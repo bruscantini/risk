@@ -48,7 +48,34 @@ function Game() {
     this.stacksTurnedIn = 0;
 }
 
-Game.prototype.start = function(playersArg) {
+/*
+ *  Function to describe how many units a player collects if they control all of a
+ *  continent at the beginning of their turn.
+ */
+Game.prototype.unitsForContinent = function(continentID) {
+    switch (continentID) {
+        case 1:
+            return 5;
+        case 2:
+            return 2;
+        case 3:
+            return 5;
+        case 4:
+            return 3;
+        case 5:
+            return 7;
+        case 6:
+            return 2;
+    }
+};
+
+/*
+ *  Function to describe how many units a player collects if they turn in a card
+ *  set.
+ */
+Game.prototype.unitsForSet = {};
+
+Game.prototype.start = function(playersArray) {
     /*
      *  For now, there will always only be 3 players. Two humans, one neutral.
      *  We will also distribute territories randomly. Player turn is order of
@@ -56,37 +83,133 @@ Game.prototype.start = function(playersArg) {
      *  turns later.
      */
 
-    if (playersArg.length !== 2) {
+    if (playersArray.length !== 2) {
         return false;
     }
-    this.players = this.players.concat(playersArg);
+    this.players = this.players.concat(playersArray);
     var neutralPlayer = new Player(3, "Kaiser the Neutral");
     neutralPlayer.alive = false;
     this.players.push(neutralPlayer);
-    _.forEach(this.players, function (elem){
-      elem.unitsToDeploy = 39;
+    _.forEach(this.players, function(elem) {
+        elem.unitsToDeploy = 39;
     });
 
-    //distribute territories
+    // distribute territories
     var shuffledTerritories = _.shuffle(this.territories);
     for (var territoryIdx = 0, playerIdx = 0; territoryIdx < shuffledTerritories.length;
         ++territoryIdx, playerIdx = ++playerIdx % this.players.length) {
-          var territory = shuffledTerritories[territoryIdx];
-          var player = this.players[playerIdx];
-          territory.owner = player.id;
-          player.territories.push(territory.id);
+        var territory = shuffledTerritories[territoryIdx];
+        var player = this.players[playerIdx];
+        territory.owner = player.id;
+        player.territories.push(territory.id);
     }
-
-
-
-
 };
 
-Game.prototype.deploy = function (territoryID, numOfUnits){
-  var territory = this.territories[territoryID - 1];
-  if (territory.id !== territoryID){
-    console.error("territory.id !== territoryID in Game.deploy()");
-    return false;
-  }
-  territory.occupyingUnits += numOfUnits;
+Game.prototype.deploy = function(territoryID, numOfUnits) {
+    var territory = this.territories[territoryID - 1];
+    if (territory.id !== territoryID) {
+        console.error("territory.id !== territoryID in Game.deploy()");
+        return false;
+    }
+    territory.occupyingUnits += numOfUnits;
+};
+
+
+Game.prototype.rollDice = function(numOfDice) {
+    var dice = [];
+    for (var die = 0; die < numOfDice; ++die) {
+        dice.push(_.random(1, 6));
+    }
+    return dice.sort().reverse();
+};
+
+Game.prototype.transferTerritory = function(territoryID, loserID, winnerID) {
+    var territory = this.territories[territoryID - 1];
+    var loser = _.find(this.players, function(player) {
+        return player.id === loserID ? true : false;
+    });
+    var winner = _.find(this.players, function(player) {
+        return player.id === winnerID ? true : false;
+    });
+    //take away from loser
+    _.pull(loser.territories, territoryID);
+    //give to winner
+    winner.territories.append(territoryID);
+    //reassign ownership in territory object
+    territory.owner = winner;
+};
+
+/*
+ *  For now, players will attack with ALL units in the 'from' territory.
+ *  Later, we can implement choosing how many units will attack.
+ */
+Game.prototype.attack = function(from, to) {
+    var attackingTerritory = this.territories[from - 1];
+    var defendingTerritory = this.territories[to - 1];
+    var attacker = attackingTerritory.owner;
+    var defender = defendingTerritory.owner;
+    var attackingUnits = attackingTerritory.occupyingUnits;
+    var defendingUnits = defendingTerritory.occupyingUnits;
+    var attackingRoll = [];
+    var defendingRoll = [];
+    var comparisons = 1;
+
+    switch (attackingUnits) {
+        case 1:
+            return; //this man should NOT be able to attack.
+        case 2:
+            attackingRoll = rollDice(1);
+            break;
+        case 3:
+            attackingRoll = rollDice(2);
+            break;
+        default:
+            attackingRoll = rollDice(3);
+    }
+    switch (defendingUnits) {
+        case 1:
+            defendingRoll = rollDice(1);
+            break;
+        default:
+            defendingRoll = rollDice(2);
+    }
+
+    comparisons = Math.min(attackingRoll.length, defendingRoll.length);
+    for (var roll = 0; roll < comparisons; ++roll) {
+        if (attackingRoll[roll] > defendingRoll[roll]) {
+            defendingUnits--;
+        } else attackingUnits--;
+    }
+
+    //Assign new occupyingUnits values to each territory after
+    //each attack round. Meaning, subtract dead units.
+    attackingTerritory.occupyingUnits = attackingUnits;
+    defendingTerritory.occupyingUnits = defendingUnits;
+
+    if (defendingUnits === 0) {
+        // defender lost territory.
+        transferTerritory(defendingTerritory, defender,
+            attacker);
+        if (defender.isWipedOut) {
+            //transfer RISK cards to winner.
+        }
+    }
+};
+
+Game.prototype.fortify = function(from, to, amount) {
+    fromTerritory = this.territories[from - 1];
+    toTerritory = this.territories[to - 1];
+    if (fromTerritory.owner !== toTerritory.owner) {
+        console.error("Can't make this fortifying move as fromTerritory" +
+            " owner is not same as toTerritory owner. What is interface smoking?");
+        return false;
+    }
+    if (amount > fromTerritory.occupyingUnits - 1) {
+        console.error("Can't make this fortifying move as fromTerritory" +
+            " has too few units. One must be left behind to defend.");
+        return false;
+    }
+    fromTerritory.occupyingUnits -= amount;
+    toTerritory.occupyingUnits += amount;
+    return true;
 };
