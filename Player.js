@@ -8,4 +8,6 @@ function Player (id, name) {
    *    the player make a move on their turn.
    */
   this.alive = true;
+  this.territories = [];
+  this.unitsToDeploy = 0;
 }

@@ -1,8 +1,8 @@
-function Territory (id, name, continentID, adjacenTerritories){
+function Territory (id, name, continentID, adjacentTerritories){
   this.id = id;
   this.name = name;
   this.continentID = continentID;
-  this.adjacenTerritories = [];
+  this.adjacentTerritories = adjacentTerritories;
   this.owner = null;
   this.occupyingUnits = 0;
 }
