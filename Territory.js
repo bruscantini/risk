@@ -4,5 +4,5 @@ function Territory (id, name, continentID, adjacentTerritories){
   this.continentID = continentID;
   this.adjacentTerritories = adjacentTerritories;
   this.owner = null;
-  this.occupyingUnits = 0;
+  this.occupyingUnits = 1;
 }

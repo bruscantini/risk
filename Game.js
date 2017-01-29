@@ -64,7 +64,7 @@ Game.prototype.start = function(playersArg) {
     neutralPlayer.alive = false;
     this.players.push(neutralPlayer);
     _.forEach(this.players, function (elem){
-      elem.unitsToDeploy = 40;
+      elem.unitsToDeploy = 39;
     });
 
     //distribute territories
@@ -82,6 +82,11 @@ Game.prototype.start = function(playersArg) {
 
 };
 
-Game.prototype.deploy = function (territory, numOfUnits){
-
+Game.prototype.deploy = function (territoryID, numOfUnits){
+  var territory = this.territories[territoryID - 1];
+  if (territory.id !== territoryID){
+    console.error("territory.id !== territoryID in Game.deploy()");
+    return false;
+  }
+  territory.occupyingUnits += numOfUnits;
 };
