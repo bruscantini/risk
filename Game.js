@@ -53,7 +53,7 @@ function Game() {
 
     // object holding details of last attack round. Used by interface to paint
     // attack details like how many dice rolled, dice value, etc.
-    this.lastAttack = null;
+    this.lastAttackDetails = null;
 }
 
 /*
@@ -136,7 +136,7 @@ Game.prototype.start = function(playersArray) {
             " implemented the functionality for more than that.");
         return false;
     }
-    this.players = this.players.concat(playersArray);
+    this.players = playersArray;
     var neutralPlayer = new Player(3, "Kaiser the Neutral");
     neutralPlayer.alive = false;
     this.players.push(neutralPlayer);
@@ -175,12 +175,8 @@ Game.prototype.rollDice = function(numOfDice) {
 
 Game.prototype.transferTerritory = function(territoryID, loserID, winnerID) {
     var territory = this.territories[territoryID - 1];
-    var loser = _.find(this.players, function(player) {
-        return player.id === loserID ? true : false;
-    });
-    var winner = _.find(this.players, function(player) {
-        return player.id === winnerID ? true : false;
-    });
+    var loser = this.players[loserID - 1];
+    var winner = this.players[winnerID - 1];
 
     if (territory.owner !== loserID) {
         console.error(loser.name + " should not be losing this territory (" +
@@ -204,14 +200,12 @@ Game.prototype.transferTerritory = function(territoryID, loserID, winnerID) {
 Game.prototype.attack = function(from, to) {
     var attackingTerritory = this.territories[from - 1];
     var defendingTerritory = this.territories[to - 1];
-    var attacker = _.find(this.players, function(player) {
-        return player.id === attackingTerritory.owner ? true : false;
-    });
-    var defender = _.find(this.players, function(player) {
-        return player.id === defendingTerritory.owner ? true : false;
-    });
+    var attacker = this.players[attackingTerritory.owner - 1];
+    var defender = this.players[defendingTerritory.owner - 1];
     var attackingUnits = attackingTerritory.occupyingUnits;
     var defendingUnits = defendingTerritory.occupyingUnits;
+    var attackersKilled = 0;
+    var defendersKilled = 0;
     var attackingRoll = [];
     var defendingRoll = [];
     var comparisons = 1;
@@ -259,9 +253,12 @@ Game.prototype.attack = function(from, to) {
     comparisons = Math.min(attackingRoll.length, defendingRoll.length);
     for (var roll = 0; roll < comparisons; ++roll) {
         if (attackingRoll[roll] > defendingRoll[roll]) {
-            defendingUnits--;
-        } else attackingUnits--;
+            defendersKilled++;
+        } else attackersKilled++;
     }
+
+    attackingUnits -= attackersKilled;
+    defendingUnits -= defendersKilled;
 
     //Assign new occupyingUnits values to each territory after
     //each attack round. Meaning, subtract dead units.
@@ -279,7 +276,16 @@ Game.prototype.attack = function(from, to) {
         }
     }
 
-
+    this.lastAttackDetails = {
+      attacker :  attacker,
+      defender : defender,
+      attackingTerritory : attackingTerritory,
+      defendingTerritory : defendingTerritory,
+      attackingRoll : attackingRoll,
+      defendingRoll : defendingRoll,
+      attackersKilled : attackersKilled,
+      defendersKilled : defendersKilled
+    };
 };
 
 Game.prototype.fortify = function(from, to, amount) {
