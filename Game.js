@@ -10,7 +10,7 @@ function Game() {
         new Territory(8, 'Eastern Canada', 1, [4, 5, 7]),
         new Territory(9, 'Western United States', 1, [2, 3, 4, 7]),
         new Territory(10, 'Argentina', 2, [11, 12]),
-        new Territory(11, 'Brazil', 2, [1, 3, 4, 25]),
+        new Territory(11, 'Brazil', 2, [10, 12, 13, 25]),
         new Territory(12, 'Peru', 2, [10, 11, 13]),
         new Territory(13, 'Venezuela', 2, [3, 11, 12]),
         new Territory(14, 'Great Britain', 3, [15, 16, 17, 20]),
@@ -45,8 +45,43 @@ function Game() {
     ];
 
     this.players = [];
-    this.stacksTurnedIn = 0;
+
+    // counter that keeps track of how many sets have been turned in so far in
+    // the game. Used to determine how many units player should receive after
+    // turning in a set.
+    this.setsTurnedIn = 0;
+
+    // object holding details of last attack round. Used by interface to paint
+    // attack details like how many dice rolled, dice value, etc.
+    this.lastAttack = null;
 }
+
+/*
+ *  Checks to see if entire continent specified by continentID belongs to
+ *  player specidifed by playerID. If so, returns true, else returns false.
+ */
+Game.prototype.isContinentOwnedByPlayer = function (continentID, playerID){
+  for (var i = 0; i < this.territories.length; ++i){
+    var territory = this.territories[i];
+    if (territory.continentID === continentID && territory.owner !== playerID){
+      return false;
+    }
+  }
+  return true;
+};
+
+/*
+ *  checks if all territories are owned by single player. If so, returns
+ *  that playsers ID. Else, returns false;
+ */
+Game.prototype.isGameOver = function(){
+  var playerID = this.territories[0].owner;
+  for (var i = 0; i < this.territories.length; ++i){
+    var territory = this.territories[i];
+    if (territory.owner !== playerID) return false;
+  }
+  return playerID;
+};
 
 /*
  *  Function to describe how many units a player collects if they control all of a
@@ -73,7 +108,20 @@ Game.prototype.unitsForContinent = function(continentID) {
  *  Function to describe how many units a player collects if they turn in a card
  *  set.
  */
-Game.prototype.unitsForSet = {};
+Game.prototype.unitsForSet = function (setNumber){
+  if (setNumber < 7){
+    switch(setNumber){
+      case 0: return 0;
+      case 1: return 4;
+      case 2: return 6;
+      case 3: return 8;
+      case 4: return 10;
+      case 5: return 12;
+      case 6: return 15;
+    }
+  }
+  return this.unitsForSet(setNumber - 1) + 5;
+};
 
 Game.prototype.start = function(playersArray) {
     /*
@@ -230,6 +278,8 @@ Game.prototype.attack = function(from, to) {
             //transfer RISK cards to winner.
         }
     }
+
+
 };
 
 Game.prototype.fortify = function(from, to, amount) {
