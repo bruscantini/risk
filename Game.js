@@ -84,6 +84,8 @@ Game.prototype.start = function(playersArray) {
      */
 
     if (playersArray.length !== 2) {
+        console.error("This should only be a two player game. We have not" +
+            " implemented the functionality for more than that.");
         return false;
     }
     this.players = this.players.concat(playersArray);
@@ -131,12 +133,20 @@ Game.prototype.transferTerritory = function(territoryID, loserID, winnerID) {
     var winner = _.find(this.players, function(player) {
         return player.id === winnerID ? true : false;
     });
+
+    if (territory.owner !== loserID) {
+        console.error(loser.name + " should not be losing this territory (" +
+            territoryID + "). It did not belong to them.");
+    }
+
+    console.log(winner.name + " takes " + territory.name + " from " + loser.name);
+
     //take away from loser
     _.pull(loser.territories, territoryID);
     //give to winner
-    winner.territories.append(territoryID);
+    winner.territories.push(territoryID);
     //reassign ownership in territory object
-    territory.owner = winner;
+    territory.owner = winner.id;
 };
 
 /*
@@ -146,33 +156,57 @@ Game.prototype.transferTerritory = function(territoryID, loserID, winnerID) {
 Game.prototype.attack = function(from, to) {
     var attackingTerritory = this.territories[from - 1];
     var defendingTerritory = this.territories[to - 1];
-    var attacker = attackingTerritory.owner;
-    var defender = defendingTerritory.owner;
+    var attacker = _.find(this.players, function(player) {
+        return player.id === attackingTerritory.owner ? true : false;
+    });
+    var defender = _.find(this.players, function(player) {
+        return player.id === defendingTerritory.owner ? true : false;
+    });
     var attackingUnits = attackingTerritory.occupyingUnits;
     var defendingUnits = defendingTerritory.occupyingUnits;
     var attackingRoll = [];
     var defendingRoll = [];
     var comparisons = 1;
 
+    if (attackingTerritory.owner === defendingTerritory.owner){
+      console.error("Territory " + from + " can't attack territory " +
+          to + " because Player can't attack his own territory.");
+      return false;
+    }
+    if (!attackingTerritory.adjacentTerritories.includes(to) ||
+        !defendingTerritory.adjacentTerritories.includes(from)) {
+        console.error("Territory " + from + " can't attack territory " +
+            to + " because they are not adjacent.");
+        return false;
+    }
+    if (attackingUnits < 2) {
+        console.error("Territory " + from + " can't attack territory " +
+            to + " because attacking territory does not have enough units.");
+        return false;
+    }
+
     switch (attackingUnits) {
         case 1:
             return; //this man should NOT be able to attack.
         case 2:
-            attackingRoll = rollDice(1);
+            attackingRoll = this.rollDice(1);
             break;
         case 3:
-            attackingRoll = rollDice(2);
+            attackingRoll = this.rollDice(2);
             break;
         default:
-            attackingRoll = rollDice(3);
+            attackingRoll = this.rollDice(3);
     }
     switch (defendingUnits) {
         case 1:
-            defendingRoll = rollDice(1);
+            defendingRoll = this.rollDice(1);
             break;
         default:
-            defendingRoll = rollDice(2);
+            defendingRoll = this.rollDice(2);
     }
+
+    console.log(attacker.name + " rolls " + attackingRoll);
+    console.log(defender.name + " rolls " + defendingRoll);
 
     comparisons = Math.min(attackingRoll.length, defendingRoll.length);
     for (var roll = 0; roll < comparisons; ++roll) {
@@ -187,9 +221,11 @@ Game.prototype.attack = function(from, to) {
     defendingTerritory.occupyingUnits = defendingUnits;
 
     if (defendingUnits === 0) {
-        // defender lost territory.
-        transferTerritory(defendingTerritory, defender,
-            attacker);
+        // defender lost territory. Transfer it and move occupying units in.
+        this.transferTerritory(defendingTerritory.id, defender.id,
+            attacker.id);
+        attackingTerritory.occupyingUnits -= attackingRoll.length;
+        defendingTerritory.occupyingUnits += attackingRoll.length;
         if (defender.isWipedOut) {
             //transfer RISK cards to winner.
         }
