@@ -20,7 +20,7 @@ function Game() {
         new Territory(18, 'Southern Europe', 3, [16, 19, 20, 23, 25, 33]),
         new Territory(19, 'Russia', 3, [16, 17, 18, 27, 33, 37]),
         new Territory(20, 'Western Europe', 3, [14, 16, 18]),
-        new Territory(21, 'Central Africa', 4, [22, 23, 25, 26]),
+        new Territory(21, 'Central Africa', 4, [22, 25, 26]),
         new Territory(22, 'East Africa', 4, [21, 23, 24, 25, 26, 33]),
         new Territory(23, 'Egypt', 4, [18, 22, 25, 33]),
         new Territory(24, 'Madagascar', 4, [22, 26]),
@@ -164,6 +164,26 @@ Game.prototype.deploy = function(territoryID, numOfUnits) {
     territory.occupyingUnits += numOfUnits;
 };
 
+/*
+ *  Adds units to a player's unitsToDeploy property based on how many
+ *  territories the player owns and if he/she owns entire continents.
+ *  Called at the beginnig of players turn.
+ */
+Game.prototype.distributeReinforcements = function(playerID){
+  var player = this.players[playerID - 1];
+  var unitsToAdd = 0;
+
+  // by territories owned
+  unitsToAdd += Math.floor(player.territories.length / 3);
+  for (var i = 1; i <= 6; ++i){
+    if (this.isContinentOwnedByPlayer(i, player.id)){
+      unitsToAdd += this.unitsForContinent(i);
+    }
+  }
+  player.unitsToDeploy += unitsToAdd;
+  return unitsToAdd;
+};
+
 
 Game.prototype.rollDice = function(numOfDice) {
     var dice = [];
@@ -288,6 +308,10 @@ Game.prototype.attack = function(from, to) {
     };
 };
 
+/*
+ *  This function can be called in the fortification phase, but also after an
+ *  attack to move more occupying units after an attack resulted in a conquer.
+ */
 Game.prototype.fortify = function(from, to, amount) {
     fromTerritory = this.territories[from - 1];
     toTerritory = this.territories[to - 1];
