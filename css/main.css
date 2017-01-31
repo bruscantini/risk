@@ -1,0 +1,52 @@
+div {
+}
+
+#board {
+  width: 1227px;
+  height: 628px;
+  background-image: url("../risk_game_mapWN.png");
+}
+
+.row {
+  width: 1227px;
+  box-sizing: border-box;
+}
+
+.mapPixel {
+  width: 25px;
+  height: 25px;
+  box-sizing: border-box;
+  float: left;
+}
+
+.continent1 {
+  /* background-color: yellow; */
+}
+
+.continent2 {
+  /* background-color: red; */
+}
+
+.continent3 {
+  /* background-color: blue; */
+}
+
+.continent4 {
+  /* background-color: orange; */
+}
+
+.continent5 {
+  /* background-color: green; */
+}
+
+.continent6 {
+
+  /* background-color: purple; */
+}
+
+.territory {
+}
+
+.territory1 {
+
+}
