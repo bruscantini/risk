@@ -36,6 +36,55 @@ var map = [
     ["0.0.12", "0.0.37"],
 ];
 
+// use territoryID as index, element is an array with row and column ([row, col])
+// of where that territories center is. index 0 is empty array because there is
+// no territory 0
+var territoryCenters = [
+    [],
+    [3, 3],
+    [5, 6],
+    [11, 6],
+    [8, 9],
+    [2, 18],
+    [3, 7],
+    [5, 9],
+    [5, 12],
+    [7, 5],
+    [21, 11],
+    [16, 14],
+    [17, 10],
+    [13, 11],
+    [5, 21],
+    [3, 20],
+    [5, 24],
+    [3, 24],
+    [7, 25],
+    [4, 28],
+    [7, 22],
+    [14, 26],
+    [13, 28],
+    [10, 26],
+    [18, 30],
+    [11, 22],
+    [19, 26],
+    [6, 32],
+    [9, 39],
+    [10, 34],
+    [5, 38],
+    [8, 44],
+    [3, 44],
+    [9, 29],
+    [6, 40], //7, 38
+    [12, 39],
+    [2, 34],
+    [3, 31],
+    [3, 39],
+    [19, 46],
+    [14, 41],
+    [15, 46],
+    [19, 41]
+];
+
 function checkMapValidity(mapArray) {
     for (var i = 0; i < mapArray.length; ++i) {
         var rowTotal = 0;
@@ -54,40 +103,73 @@ function checkMapValidity(mapArray) {
 
 
 var printTerritory = function(event) {
-    var territoryID = this.getAttribute('territory');
+    var pixelRow = parseInt(this.getAttribute('row'));
+    var pixelCol = parseInt(this.getAttribute('col'));
+    var territoryID = parseInt(this.getAttribute('territoryid'));
+    //console.log('territory is ' + territoryID);
     if (territoryID === 0) console.log('water!');
-    else //console.log('territory is ' + territoryID);
-    console.log("Territory " + territoryID + ", " + myGame.territories[territoryID - 1].name);
+    else {
+        console.log("Pixel (" + pixelRow + ", " + pixelCol + ") Territory " + territoryID + ", " + myGame.territories[territoryID - 1].name);
+    }
 };
 
-function removeBackgroundColorOfDivs (){
-  var divs = document.getElementsByClassName('territory');
-  console.log("divs length is " + divs.length);
-  for (var i = 0; i < divs.length; ++i){
-    var div = divs[i];
-    div.setAttribute('style', "background: rgba(54, 25, 25, 0)");
-  }
+function removeBackgroundColorOfDivs() {
+    var divs = document.getElementsByClassName('territory');
+    for (var i = 0; i < divs.length; ++i) {
+        var div = divs[i];
+        div.setAttribute('style', "background: rgba(54, 25, 25, 0)");
+    }
 }
 
-function getBodyHTML (){
-  return document.body.innerHTML;
+function getBodyHTML() {
+    return document.body.innerHTML;
 }
 
-function setTerritoryClickTriggers (){
-  var pixelDivs = document.getElementsByClassName('mapPixel');
-  for (var i = 0; i < pixelDivs.length; ++i){
-    var pixelDiv = pixelDivs[i];
-    pixelDiv.onclick = printTerritory;
-  }
+function setTerritoryClickTriggers() {
+    var pixelDivs = document.getElementsByClassName('mapPixel');
+    for (var i = 0; i < pixelDivs.length; ++i) {
+        var pixelDiv = pixelDivs[i];
+        pixelDiv.onclick = printTerritory;
+    }
 }
+
+function setTerritoryCenters(territoryCenters) {
+    for (var i = 1; i < territoryCenters.length; ++i) {
+        var territoryCenterRow = territoryCenters[i][0];
+        var territoryCenterCol = territoryCenters[i][1];
+        var territoryDivs = document.getElementsByClassName('territory' + i);
+        for (var j = 0; j < territoryDivs.length; ++j) {
+            var territoryDiv = territoryDivs[j];
+            if (territoryDiv.getAttribute('row') == territoryCenterRow &&
+                territoryDiv.getAttribute('col') == territoryCenterCol) {
+                  territoryDiv.setAttribute('id', 'territory' + i);
+                  territoryDiv.className += " territory-center";
+            }
+        }
+    }
+}
+
+function createStacks() {
+    var territory_centers = document.getElementsByClassName('territory-center');
+    for (var i = 0; i < territory_centers.length; ++i) {
+        var territory_center = territory_centers[i];
+        var army_stack = document.createElement('div');
+        army_stack.setAttribute('class', 'army-stack');
+        territory_center.append(army_stack);
+    }
+}
+
+
 
 
 function createDivs(mapArray) {
     for (var i = 0; i < mapArray.length; ++i) {
         var rowDiv = document.createElement("div");
+        var pixelCol = 0;
         rowDiv.setAttribute('class', 'row');
 
         for (var j = 0; j < mapArray[i].length; ++j) {
+
             var data = mapArray[i][j];
             var dataSplit = data.split(".");
             var continentID = parseInt(dataSplit[0]);
@@ -110,25 +192,23 @@ function createDivs(mapArray) {
               " is " + myGame.territories[territoryID - 1].name);
             */
 
-            for (var l = 0; l < pixelTimes; ++l) {
+            for (var l = 0; l < pixelTimes; ++l, pixelCol++) {
                 var colDiv = document.createElement('div');
                 if (continentID === 0) {
                     colDiv.setAttribute('class', 'mapPixel');
-                    colDiv.setAttribute('territoryID', territoryID);
-                    colDiv.setAttribute('continentID', continentID);
                 } else {
                     colDiv.setAttribute('class', 'mapPixel continent' + continentID +
                         " territory territory" + territoryID);
-                    colDiv.setAttribute('territory', territoryID);
-                    colDiv.onclick = printTerritory;
                 }
 
+                colDiv.setAttribute('row', i);
+                colDiv.setAttribute('col', pixelCol);
                 colDiv.setAttribute('territoryID', territoryID);
                 colDiv.setAttribute('continentID', continentID);
                 rowDiv.append(colDiv);
             }
         }
-        var boardDiv = document.getElementById('board');
+        var boardDiv = document.getElementById('board-pixel-container');
         boardDiv.append(rowDiv);
     }
 
@@ -137,8 +217,10 @@ function createDivs(mapArray) {
 //checkMapValidity(map);
 //createDivs(map);
 //console.log(getBodyHTML());
-//removeBackgroundColorOfDivs();
+removeBackgroundColorOfDivs();
 setTerritoryClickTriggers();
+setTerritoryCenters(territoryCenters);
+createStacks();
 
 /*
  *  Inteface plan:
