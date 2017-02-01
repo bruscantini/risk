@@ -137,7 +137,7 @@ Game.prototype.start = function(playersArray) {
         return false;
     }
     this.players = playersArray;
-    var neutralPlayer = new Player(3, "Kaiser the Neutral");
+    var neutralPlayer = new Player(3, "Kaiser the Neutral", "#797D81");
     neutralPlayer.alive = false;
     this.players.push(neutralPlayer);
     _.forEach(this.players, function(elem) {

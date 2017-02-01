@@ -1,6 +1,7 @@
-function Player (id, name) {
+function Player (id, name, color) {
   this.id = id;
   this.name = name;
+  this.color = color;
 
   /*
    *  alive: true if a player has not been killed. Used to determine whether

@@ -1,9 +1,7 @@
 body {
   padding: 0;
   margin: 0;
-}
-
-div {
+  font-family: 'Inconsolata', monospace;
 }
 
 #board {
@@ -47,11 +45,85 @@ div {
   height: 40px;
   border: 3px solid black;
   border-radius: 50%;
-  background-color: white;
   box-sizing: border-box;
   position: absolute;
   top: -7px;
   left: -7px;
+  text-align: center;
+  padding-top: 6px;
+}
+
+.army-stack > p {
+  color: white;
+  font-family: 'Droid Serif', serif;
+  font-size: 25px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+#info-box {
+  width: 720px;
+  height: 110px;
+  border: 3px solid black;
+  border-radius: 8%;
+  position: absolute;
+  bottom: -10px;
+  right: 140px;
+  background-color: #FDFFF7;
+  font-family: 'Inconsolata', monospace;
+  text-align: center;
+}
+
+#info-box-info {
+  width: 370px;
+  height: 110px;
+  box-sizing: border-box;
+  float: left;
+  border-right: 2px solid black;
+}
+
+#info-box-info > p {
+  padding-top: 20px;
+}
+
+#info-box-controls {
+  float: left;
+  text-align: center;
+}
+
+.info-box-controls-heading {
+
+}
+
+.info-box-controls-amount {
+
+}
+
+.info-box-controls-territory {
+
+}
+
+.info-box-controls-action-button {
+  display: block;
+  border: 1px solid black;
+  border-radius: 10%;
+  font-family: 'Open Sans', sans-serif;
+}
+
+.info-box-controls-math-button {
+  border: 1px solid black;
+  border-radius: 50%;
+  font-family: 'Droid Serif', serif;
+}
+
+.status-box {
+  width: 180px;
+  height: 300px;
+  border: 3px solid black;
+  border-radius: 8%;
+  position: absolute;
+  bottom: -10px;
+  left: 5px;
+  background-color: #FDFFF7;
 }
 
 .continent1 {
@@ -77,11 +149,4 @@ div {
 .continent6 {
 
   background-color: purple;
-}
-
-.territory {
-}
-
-.territory1 {
-
 }

@@ -1,6 +1,6 @@
 var myGame = new Game();
-var player1 = new Player(1, 'anthony');
-var player2 = new Player(2, 'gio');
+var player1 = new Player(1, 'anthony', "#2DC2BD");
+var player2 = new Player(2, 'gio', "#FC7A57");
 
 myGame.start([player1, player2]);
 
@@ -74,7 +74,7 @@ var territoryCenters = [
     [8, 44],
     [3, 44],
     [9, 29],
-    [6, 40], //7, 38
+    [6, 40],
     [12, 39],
     [2, 34],
     [3, 31],
@@ -84,6 +84,106 @@ var territoryCenters = [
     [15, 46],
     [19, 41]
 ];
+
+var messages = {
+  welcome:  "Hello, Are you ready to start a war?<br>Let's play RISK!",
+  howManyPlayers: "How many people will be playing?",
+  fortifyTerritories: function (playerID){
+    return "Player " + playerID + ", Deploy your troops.";
+  }
+
+};
+
+function renderInfoBoxInfo (msg){
+  var infoBoxInfoDiv = document.getElementById('info-box-info');
+  var text = document.createElement('p');
+  text.innerHTML = msg;
+  infoBoxInfoDiv.append(text);
+
+}
+
+function renderInfoBoxControls (){
+  var infoBoxControlsDiv = document.getElementById('info-box-controls');
+
+}
+
+function renderDeployPhaseControls (playerID){
+  var infoBoxControlsDiv = document.getElementById('info-box-controls');
+  infoBoxControlsDiv.innerHTML = "";
+  var players = myGame.players;
+  var player = players[playerID - 1];
+
+  console.log(myGame);
+  console.log(players);
+  console.log(player);
+
+  var controlsHeadingElem = document.createElement('h3');
+  var troopRemainingElem = document.createElement('h2');
+  var territoryElem = document.createElement('h3');
+  var troopsToDeployElem = document.createElement('span');
+  var minusButton = document.createElement('button');
+  var plusButton = document.createElement('button');
+  var resetButton = document.createElement('button');
+  var doneButton = document.createElement('button');
+
+  controlsHeadingElem.setAttribute('class', 'info-box-controls-heading');
+  troopRemainingElem.setAttribute('class', 'info-box-controls-amount');
+  territoryElem.setAttribute('class', 'info-box-controls-territory');
+  troopsToDeployElem.setAttribute('class', 'info-box-controls-amount');
+  minusButton.setAttribute('class', 'info-box-controls-math-button');
+  plusButton.setAttribute('class', 'info-box-controls-math-button');
+  resetButton.setAttribute('class', 'info-box-controls-action-button');
+  doneButton.setAttribute('class', 'info-box-controls-action-button');
+
+  controlsHeadingElem.innerHTML = "Troops to Deploy:";
+  troopRemainingElem.innerHTML = player.unitsToDeploy;
+  minusButton.innerHTML = '-';
+  troopsToDeployElem.innerHTML = "0";
+  plusButton.innerHTML = '+';
+  resetButton.innerHTML = 'RESET';
+  doneButton.innerHTML = 'DONE';
+
+  infoBoxControlsDiv.append(controlsHeadingElem);
+  infoBoxControlsDiv.append(troopRemainingElem);
+  infoBoxControlsDiv.append(territoryElem);
+  infoBoxControlsDiv.append(minusButton);
+  infoBoxControlsDiv.append(troopsToDeployElem);
+  infoBoxControlsDiv.append(plusButton);
+  infoBoxControlsDiv.append(resetButton);
+  infoBoxControlsDiv.append(doneButton);
+
+
+}
+
+function renderAttackPhaseControls (playerID){
+  var player = game.players[playerID - 1];
+  var FromElem = document.createElement('h3');
+  var fromTerritoryElem = document.createElement('h2');
+  var ToElem = document.createElement('h3');
+  var toTerritoryElem = document.createElement('h2');
+  var skipButton = document.createElement('button');
+  var attackButton = document.createElement('button');
+}
+
+function renderMoveAfterConquerControls (playerID){
+  var player = game.players[playerID - 1];
+  var headingElem = document.createElement('h3');
+  var troopsToOccupy = document.createElement('span');
+  var minusButton = document.createElement('button');
+  var plusButton = document.createElement('button');
+  var occupyButton = document.createElement('button');
+}
+
+function renderFortifyPhaseControls (playerID){
+  var player = game.players[playerID - 1];
+  var FromElem = document.createElement('h3');
+  var fromTerritoryElem = document.createElement('h2');
+  var ToElem = document.createElement('h3');
+  var toTerritoryElem = document.createElement('h2');
+  var troopsToFortify = document.createElement('span');
+  var minusButton = document.createElement('button');
+  var plusButton = document.createElement('button');
+}
 
 function checkMapValidity(mapArray) {
     for (var i = 0; i < mapArray.length; ++i) {
@@ -150,16 +250,26 @@ function setTerritoryCenters(territoryCenters) {
 }
 
 function createStacks() {
-    var territory_centers = document.getElementsByClassName('territory-center');
-    for (var i = 0; i < territory_centers.length; ++i) {
-        var territory_center = territory_centers[i];
+    var territory_centerDivs = document.getElementsByClassName('territory-center');
+    for (var i = 0; i < territory_centerDivs.length; ++i) {
+        var territory_centerDiv = territory_centerDivs[i];
+        var territoryID = parseInt(territory_centerDiv.getAttribute('territoryID'));
+        var territory = myGame.territories[territoryID - 1];
+        var ownerID = territory.owner;
+        var owner = myGame.players[ownerID - 1];
         var army_stack = document.createElement('div');
+        var stackSize = document.createElement('p');
+        stackSize.innerHTML = territory.occupyingUnits;
         army_stack.setAttribute('class', 'army-stack');
-        territory_center.append(army_stack);
+        army_stack.setAttribute('style', 'background-color: ' + owner.color);
+        army_stack.append(stackSize);
+        territory_centerDiv.append(army_stack);
     }
 }
 
+function colorStack() {
 
+}
 
 
 function createDivs(mapArray) {
@@ -214,13 +324,25 @@ function createDivs(mapArray) {
 
 }
 
+function initialDeployment(){
+  var unitsRemaining = 0;
+  var players = myGame.players;
+  for (var i = 0; i < players.length; ++i){
+    unitsRemaining += players[i].unitsToDeploy;
+  }
+  //console.log("Remaining units: " + unitsRemaining);
+  renderDeployPhaseControls(1);
+}
+
 //checkMapValidity(map);
 //createDivs(map);
 //console.log(getBodyHTML());
 removeBackgroundColorOfDivs();
-setTerritoryClickTriggers();
+//setTerritoryClickTriggers();
 setTerritoryCenters(territoryCenters);
 createStacks();
+renderInfoBoxInfo(messages.welcome);
+initialDeployment();
 
 /*
  *  Inteface plan:
