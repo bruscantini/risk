@@ -59,6 +59,14 @@ function Game() {
     this.currentPlayer = null;
     //this.currentFromTerritory = null;
     //this.currentToTerritory = null;
+
+    /*
+     *  0:  initial deployment
+     *  1:  deployment
+     *  2:  attack
+     *  3:  fortify
+     */
+    this.phase = 1;
 }
 
 /*
@@ -233,6 +241,8 @@ Game.prototype.attack = function(from, to) {
     var defendersKilled = 0;
     var attackingRoll = [];
     var defendingRoll = [];
+    var territoryConquered = false;
+    var defenderWipedOut = false;
     var comparisons = 1;
 
     if (attackingTerritory.owner === defendingTerritory.owner){
@@ -251,6 +261,9 @@ Game.prototype.attack = function(from, to) {
             to + " because attacking territory does not have enough units.");
         return false;
     }
+
+    //clear previous attack info
+    this.lastAttackDetails = null;
 
     switch (attackingUnits) {
         case 1:
@@ -296,7 +309,10 @@ Game.prototype.attack = function(from, to) {
             attacker.id);
         attackingTerritory.occupyingUnits -= attackingRoll.length;
         defendingTerritory.occupyingUnits += attackingRoll.length;
-        if (defender.isWipedOut) {
+
+        territoryConquered = true;
+        if (defender.isWipedOut()) {
+            defenderWipedOut = true;
             //transfer RISK cards to winner.
         }
     }
@@ -309,8 +325,12 @@ Game.prototype.attack = function(from, to) {
       attackingRoll : attackingRoll,
       defendingRoll : defendingRoll,
       attackersKilled : attackersKilled,
-      defendersKilled : defendersKilled
+      defendersKilled : defendersKilled,
+      territoryConquered : territoryConquered,
+      defenderWipedOut : defenderWipedOut
     };
+
+    return true;
 };
 
 /*

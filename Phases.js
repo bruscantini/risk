@@ -1,5 +1,5 @@
-function DeploymentPhase (playerID, game){
-  this.player = game.players[playerID - 1];
+function DeploymentPhase (game){
+  this.player = game.currentPlayer;
   this.unitsToDeploy = this.player.unitsToDeploy;
   this.territories = {};
   this.currentTerritory = null;
@@ -15,4 +15,15 @@ function DeploymentPhase (playerID, game){
     }
   }
 
+}
+
+function AttackPhase (game){
+  this.fromTerritory = null;
+  this.toTerritory = null;
+  this.movePhaseFromTerritory = null;
+  this.movePhaseToTerritory = null;
+
+  this.unitsFromBeforeOccupy = 0;
+  this.unitsToBeforeOccupy = 0;
+  this.unitsToMove = 0;
 }

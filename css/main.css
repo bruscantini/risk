@@ -107,7 +107,7 @@ body {
 }
 
 #to-territory {
-  
+
 }
 
 #troops-to-deploy {
@@ -144,6 +144,12 @@ body {
 }
 
 #reset-button {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#attack-button {
   position: absolute;
   bottom: 0;
   left: 0;
