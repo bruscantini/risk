@@ -86,19 +86,53 @@ body {
 }
 
 #info-box-controls {
+  width: 350px;
+  height: 110px;
+  box-sizing: border-box;
   float: left;
+  position: relative;
   text-align: center;
 }
 
 .info-box-controls-heading {
-
+  padding: 5px 0;
 }
 
 .info-box-controls-amount {
+  padding: 5px 20px;
+}
+
+#from-territory {
+
+}
+
+#to-territory {
+  
+}
+
+#troops-to-deploy {
 
 }
 
 .info-box-controls-territory {
+
+}
+
+.info-box-controls-math-button {
+  width: 30px;
+  height: 30px;
+  margin: 0 5px;
+  border: 1px solid black;
+  border-radius: 50%;
+  font-family: 'Droid Serif', serif;
+  font-size: 20px;
+}
+
+#minus-button {
+
+}
+
+#plus-button {
 
 }
 
@@ -109,10 +143,16 @@ body {
   font-family: 'Open Sans', sans-serif;
 }
 
-.info-box-controls-math-button {
-  border: 1px solid black;
-  border-radius: 50%;
-  font-family: 'Droid Serif', serif;
+#reset-button {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+}
+
+#done-button {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 .status-box {

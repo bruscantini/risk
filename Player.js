@@ -25,3 +25,8 @@ Player.prototype.isWipedOut = function() {
   }
   return false;
 };
+
+Player.prototype.ownTerritory = function(territoryID){
+  if (this.territories.includes(territoryID)) return true;
+  return false;
+};

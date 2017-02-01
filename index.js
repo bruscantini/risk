@@ -1,11 +1,12 @@
 var myGame = new Game();
-var player1 = new Player(1, 'anthony', "#2DC2BD");
-var player2 = new Player(2, 'gio', "#FC7A57");
+var deploymentPhase;
 
-myGame.start([player1, player2]);
 
-myGame.deploy(4, 9);
-console.table(myGame.territories);
+myGame.start([new Player(1, 'anthony', "#2DC2BD"), new Player(2, 'gio', "#FC7A57")]);
+
+
+//myGame.deploy(4, 9);
+//console.table(myGame.territories);
 //myGame.attack(4, 7);
 
 var map = [
@@ -102,58 +103,140 @@ function renderInfoBoxInfo (msg){
 
 }
 
-function renderInfoBoxControls (){
-  var infoBoxControlsDiv = document.getElementById('info-box-controls');
+function deployPhaseMinusClick (){
+  var currentTerritory = deploymentPhase.currentTerritory;
+  if (!currentTerritory) return;
 
+  var troopsToDeployAmountElem = document.getElementById('troops-to-deploy');
+  var currentPlayer = myGame.currentPlayer;
+  var currentTerritoryDiv = document.getElementById('territory' + currentTerritory.id);
+  var armyStackDiv = currentTerritoryDiv.firstElementChild;
+  var armyStackAmount = armyStackDiv.firstElementChild;
+
+  if (currentTerritory && deploymentPhase.territories[currentTerritory.id].add > 0){
+    deploymentPhase.unitsToDeploy++;
+    deploymentPhase.territories[currentTerritory.id].add--;
+
+    //paint it;
+    troopsToDeployAmountElem.innerHTML = deploymentPhase.unitsToDeploy;
+    armyStackAmount.innerHTML =
+      deploymentPhase.territories[currentTerritory.id].start +
+      deploymentPhase.territories[currentTerritory.id].add;
+  }
+}
+
+function deployPhasePlusClick() {
+  var currentTerritory = deploymentPhase.currentTerritory;
+  if (!currentTerritory) return;
+
+  var troopsToDeployAmountElem = document.getElementById('troops-to-deploy');
+  var currentPlayer = myGame.currentPlayer;
+  var currentTerritoryDiv = document.getElementById('territory' + currentTerritory.id);
+  var armyStackDiv = currentTerritoryDiv.firstElementChild;
+  var armyStackAmount = armyStackDiv.firstElementChild;
+
+  if (currentTerritory && currentPlayer.unitsToDeploy > 0){
+    deploymentPhase.unitsToDeploy--;
+    deploymentPhase.territories[currentTerritory.id].add++;
+
+    //paint it;
+    troopsToDeployAmountElem.innerHTML = deploymentPhase.unitsToDeploy;
+    armyStackAmount.innerHTML =
+      deploymentPhase.territories[currentTerritory.id].start +
+      deploymentPhase.territories[currentTerritory.id].add;
+  }
+}
+
+function deployPhaseTerritoryClick (){
+
+  var territoryID = parseInt(this.getAttribute('territoryID'));
+  var territory =  myGame.territories[territoryID - 1];
+  var infoControlTerritoryElem = document.getElementById('to-territory');
+  deploymentPhase.currentTerritory = territory;
+  //myGame.currentToTerritory = territory;
+  infoControlTerritoryElem.innerHTML = territory.name;
+  //console.log(deploymentPhase.player.id);
+
+
+/*
+  var player = myGame.currentPlayer;
+  var troopRemainingToDeploy = player.unitsToDeploy;
+  var troopsRemainingElem = document.getElementById('troops-to-deploy');
+  var troopsAtTerritory = territory.occupyingUnits;
+  var troopsAtTerritoryAmountElem = this.firstElementChild;
+
+*/
+
+
+}
+
+function doDeploymentPhase (){
+  deploymentPhase = new DeploymentPhase(myGame.currentPlayer.id, myGame);
+  var territoryCenterDivs = document.getElementsByClassName('territory-center');
+  var plusButtonElem = document.getElementById('plus-button');
+  var minusButtonElem = document.getElementById('minus-button');
+  for (var i = 0; i < territoryCenterDivs.length; ++i){
+    var territoryCenterDiv = territoryCenterDivs[i];
+    var armyStackDiv = territoryCenterDiv.getElementsByClassName('army-stack')[0];
+    var divTerritoryID = parseInt(territoryCenterDiv.getAttribute('territoryID'));
+    if (myGame.currentPlayer.territories.includes(divTerritoryID)){
+      armyStackDiv.onclick = deployPhaseTerritoryClick;
+    }
+  }
+
+  plusButtonElem.onclick = deployPhasePlusClick;
+  minusButtonElem.onclick = deployPhaseMinusClick;
 }
 
 function renderDeployPhaseControls (playerID){
   var infoBoxControlsDiv = document.getElementById('info-box-controls');
   infoBoxControlsDiv.innerHTML = "";
-  var players = myGame.players;
-  var player = players[playerID - 1];
+  var player = myGame.currentPlayer;
 
-  console.log(myGame);
-  console.log(players);
-  console.log(player);
-
-  var controlsHeadingElem = document.createElement('h3');
-  var troopRemainingElem = document.createElement('h2');
-  var territoryElem = document.createElement('h3');
+  var troopsRemainingHeadingElem = document.createElement('p');
+  var troopRemainingAmountElem = document.createElement('p');
+  var territoryElem = document.createElement('span');
   var troopsToDeployElem = document.createElement('span');
   var minusButton = document.createElement('button');
   var plusButton = document.createElement('button');
   var resetButton = document.createElement('button');
   var doneButton = document.createElement('button');
 
-  controlsHeadingElem.setAttribute('class', 'info-box-controls-heading');
-  troopRemainingElem.setAttribute('class', 'info-box-controls-amount');
+  troopsRemainingHeadingElem.setAttribute('class', 'info-box-controls-heading');
+  troopRemainingAmountElem.setAttribute('class', 'info-box-controls-amount');
+  troopRemainingAmountElem.id = 'troops-to-deploy';
   territoryElem.setAttribute('class', 'info-box-controls-territory');
-  troopsToDeployElem.setAttribute('class', 'info-box-controls-amount');
+  territoryElem.id = 'to-territory';
+  //troopsToDeployElem.setAttribute('class', 'info-box-controls-amount');
   minusButton.setAttribute('class', 'info-box-controls-math-button');
+  minusButton.id = 'minus-button';
   plusButton.setAttribute('class', 'info-box-controls-math-button');
+  plusButton.id = 'plus-button';
   resetButton.setAttribute('class', 'info-box-controls-action-button');
+  resetButton.id = 'reset-button';
   doneButton.setAttribute('class', 'info-box-controls-action-button');
+  doneButton.id = 'done-button';
 
-  controlsHeadingElem.innerHTML = "Troops to Deploy:";
-  troopRemainingElem.innerHTML = player.unitsToDeploy;
+  troopsRemainingHeadingElem.innerHTML = "Troops to Deploy:";
+  troopRemainingAmountElem.innerHTML = player.unitsToDeploy;
   minusButton.innerHTML = '-';
-  troopsToDeployElem.innerHTML = "0";
+  //troopsToDeployElem.innerHTML = "0";
   plusButton.innerHTML = '+';
   resetButton.innerHTML = 'RESET';
   doneButton.innerHTML = 'DONE';
 
-  infoBoxControlsDiv.append(controlsHeadingElem);
-  infoBoxControlsDiv.append(troopRemainingElem);
-  infoBoxControlsDiv.append(territoryElem);
+  infoBoxControlsDiv.append(troopsRemainingHeadingElem);
+  infoBoxControlsDiv.append(troopRemainingAmountElem);
   infoBoxControlsDiv.append(minusButton);
-  infoBoxControlsDiv.append(troopsToDeployElem);
+  infoBoxControlsDiv.append(territoryElem);
   infoBoxControlsDiv.append(plusButton);
   infoBoxControlsDiv.append(resetButton);
   infoBoxControlsDiv.append(doneButton);
 
-
+  doDeploymentPhase();
 }
+
+
 
 function renderAttackPhaseControls (playerID){
   var player = game.players[playerID - 1];
@@ -261,14 +344,11 @@ function createStacks() {
         var stackSize = document.createElement('p');
         stackSize.innerHTML = territory.occupyingUnits;
         army_stack.setAttribute('class', 'army-stack');
+        army_stack.setAttribute('territoryID', territoryID);
         army_stack.setAttribute('style', 'background-color: ' + owner.color);
         army_stack.append(stackSize);
         territory_centerDiv.append(army_stack);
     }
-}
-
-function colorStack() {
-
 }
 
 
@@ -324,14 +404,12 @@ function createDivs(mapArray) {
 
 }
 
+// 1. render Deploymentphase controls
+// 2. call deployment for first player
 function initialDeployment(){
-  var unitsRemaining = 0;
-  var players = myGame.players;
-  for (var i = 0; i < players.length; ++i){
-    unitsRemaining += players[i].unitsToDeploy;
-  }
-  //console.log("Remaining units: " + unitsRemaining);
-  renderDeployPhaseControls(1);
+  myGame.currentPlayer = myGame.players[0];
+  renderDeployPhaseControls();
+
 }
 
 //checkMapValidity(map);

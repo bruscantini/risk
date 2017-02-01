@@ -54,6 +54,11 @@ function Game() {
     // object holding details of last attack round. Used by interface to paint
     // attack details like how many dice rolled, dice value, etc.
     this.lastAttackDetails = null;
+
+    // should represent whoever's turn it is.
+    this.currentPlayer = null;
+    //this.currentFromTerritory = null;
+    //this.currentToTerritory = null;
 }
 
 /*
@@ -72,7 +77,7 @@ Game.prototype.isContinentOwnedByPlayer = function (continentID, playerID){
 
 /*
  *  checks if all territories are owned by single player. If so, returns
- *  that playsers ID. Else, returns false;
+ *  that players ID. Else, returns false;
  */
 Game.prototype.isGameOver = function(){
   var playerID = this.territories[0].owner;
