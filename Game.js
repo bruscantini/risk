@@ -61,13 +61,29 @@ function Game() {
     //this.currentToTerritory = null;
 
     /*
-     *  0:  initial deployment
-     *  1:  deployment
-     *  2:  attack
-     *  3:  fortify
+     *  -1:  initial deployment
+     *  0:  deployment
+     *  1:  attack
+     *  2:  fortify
      */
-    this.phase = 1;
+    this.phase = 0;
 }
+
+/*
+ *  Changes phase and maybe player if on last phase.
+ */
+Game.prototype.changePhase = function (){
+  this.phase = (this.phase + 1) % 3;
+  if (this.phase === 0){
+    var nextPlayer = this.players[(this.currentPlayer.id + 1) % this.players.length];
+
+    // Must account for end game situation - where all but one players are DEAD.
+    while (!nextPlayer.alive){
+      nextPlayer = this.players[(nextPlayer.id + 1) % this.players.length];
+    }
+     this.currentPlayer = nextPlayer;
+   }
+};
 
 /*
  *  Checks to see if entire continent specified by continentID belongs to

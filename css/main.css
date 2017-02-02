@@ -81,8 +81,14 @@ body {
   border-right: 2px solid black;
 }
 
-#info-box-info > p {
-  padding-top: 20px;
+#info-box-info-heading {
+  padding-top: 10px;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+#info-box-info-p {
+  padding-top: 10px;
 }
 
 #info-box-controls {
