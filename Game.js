@@ -66,50 +66,53 @@ function Game() {
      *  1:  attack
      *  2:  fortify
      */
-    this.phase = 0;
+    this.phase = -1;
 }
 
 /*
- *  Changes phase and maybe player if on last phase.
+ *  Changes phase.
  */
-Game.prototype.changePhase = function (){
-  this.phase = (this.phase + 1) % 3;
-  if (this.phase === 0){
-    var nextPlayer = this.players[(this.currentPlayer.id + 1) % this.players.length];
+Game.prototype.changePhase = function() {
+    this.phase = (this.phase + 1) % 3;
+};
 
-    // Must account for end game situation - where all but one players are DEAD.
-    while (!nextPlayer.alive){
-      nextPlayer = this.players[(nextPlayer.id + 1) % this.players.length];
+// Must account for end game situation - where all but one players are DEAD.
+Game.prototype.changePlayer = function() {
+    var nextPlayer = this.players[(this.currentPlayer.id) % this.players.length];
+
+    /*
+    while (!nextPlayer.alive) {
+        nextPlayer = this.players[(nextPlayer.id + 1) % this.players.length];
     }
-     this.currentPlayer = nextPlayer;
-   }
+    */
+    this.currentPlayer = nextPlayer;
 };
 
 /*
  *  Checks to see if entire continent specified by continentID belongs to
  *  player specidifed by playerID. If so, returns true, else returns false.
  */
-Game.prototype.isContinentOwnedByPlayer = function (continentID, playerID){
-  for (var i = 0; i < this.territories.length; ++i){
-    var territory = this.territories[i];
-    if (territory.continentID === continentID && territory.owner !== playerID){
-      return false;
+Game.prototype.isContinentOwnedByPlayer = function(continentID, playerID) {
+    for (var i = 0; i < this.territories.length; ++i) {
+        var territory = this.territories[i];
+        if (territory.continentID === continentID && territory.owner !== playerID) {
+            return false;
+        }
     }
-  }
-  return true;
+    return true;
 };
 
 /*
  *  checks if all territories are owned by single player. If so, returns
  *  that players ID. Else, returns false;
  */
-Game.prototype.isGameOver = function(){
-  var playerID = this.territories[0].owner;
-  for (var i = 0; i < this.territories.length; ++i){
-    var territory = this.territories[i];
-    if (territory.owner !== playerID) return false;
-  }
-  return playerID;
+Game.prototype.isGameOver = function() {
+    var playerID = this.territories[0].owner;
+    for (var i = 0; i < this.territories.length; ++i) {
+        var territory = this.territories[i];
+        if (territory.owner !== playerID) return false;
+    }
+    return playerID;
 };
 
 /*
@@ -137,19 +140,44 @@ Game.prototype.unitsForContinent = function(continentID) {
  *  Function to describe how many units a player collects if they turn in a card
  *  set.
  */
-Game.prototype.unitsForSet = function (setNumber){
-  if (setNumber < 7){
-    switch(setNumber){
-      case 0: return 0;
-      case 1: return 4;
-      case 2: return 6;
-      case 3: return 8;
-      case 4: return 10;
-      case 5: return 12;
-      case 6: return 15;
+Game.prototype.unitsForSet = function(setNumber) {
+    if (setNumber < 7) {
+        switch (setNumber) {
+            case 0:
+                return 0;
+            case 1:
+                return 4;
+            case 2:
+                return 6;
+            case 3:
+                return 8;
+            case 4:
+                return 10;
+            case 5:
+                return 12;
+            case 6:
+                return 15;
+        }
     }
-  }
-  return this.unitsForSet(setNumber - 1) + 5;
+    return this.unitsForSet(setNumber - 1) + 5;
+};
+
+Game.prototype.deployUnitsEvenly = function(playerID) {
+    var player = this.players[playerID - 1];
+    var unitsToDeploy = player.unitsToDeploy;
+    var territories = player.territories;
+
+    while (unitsToDeploy > 0) {
+        for (var i = 0; i < territories.length; ++i) {
+            var territory = this.territories[territories[i] - 1];
+            if (unitsToDeploy === 0) {
+                break;
+            }
+            this.deploy(territory.id, 1);
+            unitsToDeploy--;
+        }
+    }
+    player.unitsToDeploy = 0;
 };
 
 Game.prototype.start = function(playersArray) {
@@ -198,19 +226,20 @@ Game.prototype.deploy = function(territoryID, numOfUnits) {
  *  territories the player owns and if he/she owns entire continents.
  *  Called at the beginnig of players turn.
  */
-Game.prototype.distributeReinforcements = function(playerID){
-  var player = this.players[playerID - 1];
-  var unitsToAdd = 0;
+Game.prototype.distributeReinforcements = function(playerID) {
+    var player = this.players[playerID - 1];
+    var unitsToAdd = 0;
 
-  // by territories owned
-  unitsToAdd += Math.floor(player.territories.length / 3);
-  for (var i = 1; i <= 6; ++i){
-    if (this.isContinentOwnedByPlayer(i, player.id)){
-      unitsToAdd += this.unitsForContinent(i);
+    // by territories owned
+    unitsToAdd += Math.floor(player.territories.length / 3);
+    for (var i = 1; i <= 6; ++i) {
+        if (this.isContinentOwnedByPlayer(i, player.id)) {
+            unitsToAdd += this.unitsForContinent(i);
+        }
     }
-  }
-  player.unitsToDeploy += unitsToAdd;
-  return unitsToAdd;
+
+    player.unitsToDeploy += unitsToAdd;
+    return unitsToAdd;
 };
 
 
@@ -261,10 +290,10 @@ Game.prototype.attack = function(from, to) {
     var defenderWipedOut = false;
     var comparisons = 1;
 
-    if (attackingTerritory.owner === defendingTerritory.owner){
-      console.error("Territory " + from + " can't attack territory " +
-          to + " because Player can't attack his own territory.");
-      return false;
+    if (attackingTerritory.owner === defendingTerritory.owner) {
+        console.error("Territory " + from + " can't attack territory " +
+            to + " because Player can't attack his own territory.");
+        return false;
     }
     if (!attackingTerritory.adjacentTerritories.includes(to) ||
         !defendingTerritory.adjacentTerritories.includes(from)) {
@@ -334,16 +363,16 @@ Game.prototype.attack = function(from, to) {
     }
 
     this.lastAttackDetails = {
-      attacker :  attacker,
-      defender : defender,
-      attackingTerritory : attackingTerritory,
-      defendingTerritory : defendingTerritory,
-      attackingRoll : attackingRoll,
-      defendingRoll : defendingRoll,
-      attackersKilled : attackersKilled,
-      defendersKilled : defendersKilled,
-      territoryConquered : territoryConquered,
-      defenderWipedOut : defenderWipedOut
+        attacker: attacker,
+        defender: defender,
+        attackingTerritory: attackingTerritory,
+        defendingTerritory: defendingTerritory,
+        attackingRoll: attackingRoll,
+        defendingRoll: defendingRoll,
+        attackersKilled: attackersKilled,
+        defendersKilled: defendersKilled,
+        territoryConquered: territoryConquered,
+        defenderWipedOut: defenderWipedOut
     };
 
     return true;

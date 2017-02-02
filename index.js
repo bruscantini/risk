@@ -93,10 +93,10 @@ var messages = {
 };
 
 function renderInfoBoxInfo(heading, msg) {
-  var infoBoxInfoHeading = document.getElementById('info-box-info-heading');
-  var infoBoxInfoP = document.getElementById('info-box-info-p');
-  infoBoxInfoHeading.innerHTML = heading;
-  infoBoxInfoP.innerHTML = msg;
+    var infoBoxInfoHeading = document.getElementById('info-box-info-heading');
+    var infoBoxInfoP = document.getElementById('info-box-info-p');
+    infoBoxInfoHeading.innerHTML = heading;
+    infoBoxInfoP.innerHTML = msg;
 }
 
 //this button should work for all of deploymentPhase, attackPhase, and fortificationPhase
@@ -109,10 +109,11 @@ function doneClick() {
             myGame.changePhase();
             // must deploy the troops
             var territoriesDeploy = Object.keys(deploymentPhase.territories);
-            for (var i = 0; i < territoriesDeploy.length; ++i){
-              var territoryID = parseInt(territoriesDeploy[i]);
-              var unitsToAdd = deploymentPhase.territories[territoryID].add;
-              myGame.deploy(territoryID, unitsToAdd);
+            for (var i = 0; i < territoriesDeploy.length; ++i) {
+                var territoryID = parseInt(territoriesDeploy[i]);
+                var unitsToAdd = deploymentPhase.territories[territoryID].add;
+                myGame.currentPlayer.unitsToDeploy -= unitsToAdd;
+                myGame.deploy(territoryID, unitsToAdd);
             }
             renderAttackPhaseControls();
             break;
@@ -126,6 +127,7 @@ function doneClick() {
                     fortificationPhase.toTerritory.id, fortificationPhase.unitsToMove);
                 // print message of how many were moved.
                 myGame.changePhase();
+                myGame.changePlayer();
                 renderDeployPhaseControls();
             }
             break;
@@ -215,10 +217,10 @@ function attackPhaseAttackClick() {
 
         // check if game is over.
 
-        if (fromTerritory.occupyingUnits > 1){
-          attackPhase.movePhaseFromTerritory = fromTerritory;
-          attackPhase.movePhaseToTerritory = toTerritory;
-          renderAttackPhaseMoveControls();
+        if (fromTerritory.occupyingUnits > 1) {
+            attackPhase.movePhaseFromTerritory = fromTerritory;
+            attackPhase.movePhaseToTerritory = toTerritory;
+            renderAttackPhaseMoveControls();
         }
 
     }
@@ -317,7 +319,7 @@ function doAttackPhase() {
         armyStackDiv.onclick = attackPhaseTerritoryClick;
     }
     attackButton.onclick = attackPhaseAttackClick;
-    doneButton.onClick = doneClick;
+    doneButton.onClick = doneclick;
 }
 
 //sets the clickers
@@ -568,9 +570,19 @@ function renderDeployPhaseControls() {
     var plusButton = document.createElement('button');
     var resetButton = document.createElement('button');
     var doneButton = document.createElement('button');
+    var recruitsReceived = myGame.distributeReinforcements(player.id);
+
+    if (!player.alive){
+      distributeAndPaintNeutrals();
+      myGame.changePlayer();
+      renderDeployPhaseControls();
+      return;
+    }
 
     renderInfoBoxInfo("Player " + player.id + " : DEPLOY", "Deploy your recruits to your " +
         "territories.");
+    //renderStatusBox - say how many recruitsReceived !
+
 
     troopsRemainingHeadingElem.setAttribute('class', 'info-box-controls-heading');
     troopRemainingAmountElem.setAttribute('class', 'info-box-controls-amount');
@@ -742,11 +754,84 @@ function createDivs(mapArray) {
 
 }
 
-// 1. render Deploymentphase controls
-// 2. call deployment for first player
+function distributeAndPaintNeutrals() {
+    var player = myGame.currentPlayer;
+    myGame.deployUnitsEvenly(player.id);
+
+    var armyStackDivs = document.getElementsByClassName('army-stack');
+    for (var i = 0; i < armyStackDivs.length; ++i) {
+        var armyStackDiv = armyStackDivs[i];
+        var territoryID = parseInt(armyStackDiv.getAttribute('territoryID'));
+        var territory = myGame.territories[territoryID - 1];
+        armyStackDiv.firstElementChild.innerHTML = territory.occupyingUnits;
+    }
+}
+
+function initialDeploymentTerritoryClick() {
+    //add a unit to current players territory
+    //change currentPlayer and call renderInitialDeployment
+
+    var player = myGame.currentPlayer;
+    var territoryID = parseInt(this.getAttribute('territoryID'));
+    var territory = myGame.territories[territoryID - 1];
+    var armyStackAmountElem = this.firstElementChild;
+
+    if (player.ownTerritory(territoryID)) {
+        player.unitsToDeploy--;
+        myGame.deploy(territoryID, 1);
+        armyStackAmountElem.innerHTML = territory.occupyingUnits;
+        myGame.changePlayer();
+        renderInitialDeployment();
+    }
+}
+
+function renderInitialDeployment() {
+    var infoBoxControlsDiv = document.getElementById('info-box-controls');
+    infoBoxControlsDiv.innerHTML = "";
+
+    var player = myGame.currentPlayer;
+    var troopsRemainingHeadingElem = document.createElement('p');
+    var troopRemainingAmountElem = document.createElement('p');
+
+    if (!player.alive) {
+        distributeAndPaintNeutrals();
+        myGame.changePlayer();
+        renderInitialDeployment();
+        return;
+    } else if (player.unitsToDeploy === 0) {
+        myGame.changePhase();
+        renderDeployPhaseControls();
+        return;
+    } else {
+
+        renderInfoBoxInfo("Player " + player.id + " : INITIAL DEPLOYMENT", "Choose one of your territories" +
+            " to place a unit. We alternate players until all troops are deployed.");
+
+        troopsRemainingHeadingElem.setAttribute('class', 'info-box-controls-heading');
+        troopRemainingAmountElem.setAttribute('class', 'info-box-controls-amount');
+        troopRemainingAmountElem.id = 'troops-to-deploy';
+        troopsRemainingHeadingElem.innerHTML = "Troops to Deploy:";
+        troopRemainingAmountElem.innerHTML = player.unitsToDeploy;
+
+        infoBoxControlsDiv.append(troopsRemainingHeadingElem);
+        infoBoxControlsDiv.append(troopRemainingAmountElem);
+
+        var territoryCenterDivs = document.getElementsByClassName('territory-center');
+        for (var i = 0; i < territoryCenterDivs.length; ++i) {
+            var armyStackDiv = territoryCenterDivs[i].firstElementChild;
+            armyStackDiv.onclick = initialDeploymentTerritoryClick;
+        }
+    }
+
+    // if currentPlayer has no more units to deploy,
+    //    changePhase and renderDeployPhaseControls;
+    // else set territory-center army stacks to initialDeploymentTerritoryClick
+}
+
 function initialDeployment() {
     myGame.currentPlayer = myGame.players[0];
-    renderDeployPhaseControls();
+    renderInitialDeployment();
+    //renderDeployPhaseControls();
     //renderAttackPhaseControls();
     //renderFortifyPhaseControls();
 
