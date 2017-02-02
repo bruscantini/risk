@@ -319,7 +319,7 @@ function doAttackPhase() {
         armyStackDiv.onclick = attackPhaseTerritoryClick;
     }
     attackButton.onclick = attackPhaseAttackClick;
-    doneButton.onClick = doneclick;
+    doneButton.onclick = doneClick;
 }
 
 //sets the clickers
@@ -830,6 +830,17 @@ function renderInitialDeployment() {
 
 function initialDeployment() {
     myGame.currentPlayer = myGame.players[0];
+
+    // for testing, deploy units and skip inital deployment.
+    distributeAndPaintNeutrals();
+    myGame.currentPlayer = myGame.players[1];
+    distributeAndPaintNeutrals();
+    myGame.currentPlayer = myGame.players[2];
+    distributeAndPaintNeutrals();
+    myGame.currentPlayer = myGame.players[0];
+    //
+
+
     renderInitialDeployment();
     //renderDeployPhaseControls();
     //renderAttackPhaseControls();
