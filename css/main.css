@@ -82,13 +82,18 @@ body {
 }
 
 #info-box-info-heading {
-  padding-top: 10px;
+  padding-top: 5px;
   font-size: 20px;
   font-weight: bold;
 }
 
+#heading-player {
+  font-size: 25px;
+  text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
 #info-box-info-p {
-  padding-top: 10px;
+  padding-top: 5px;
 }
 
 #info-box-controls {
@@ -182,6 +187,11 @@ body {
   bottom: -10px;
   left: 5px;
   background-color: #FDFFF7;
+  text-align: center;
+}
+
+#status-box-p {
+  padding-top: 5px;
 }
 
 .continent1 {
