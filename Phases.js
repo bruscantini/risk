@@ -27,3 +27,12 @@ function AttackPhase (game){
   this.unitsToBeforeOccupy = 0;
   this.unitsToMove = 0;
 }
+
+function FortificationPhase (game){
+  this.fromTerritory = null;
+  this.toTerritory = null;
+  this.unitsFromBeforeFortify = 0;
+  this.unitsToBeforeFortify = 0;
+  this.unitsToMove = 0;
+  this.set = false;
+}

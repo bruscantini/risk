@@ -1,7 +1,7 @@
 var myGame = new Game();
 var deploymentPhase;
 var attackPhase;
-var fortifyPhase;
+var fortificationPhase;
 
 
 myGame.start([new Player(1, 'anthony', "#2DC2BD"), new Player(2, 'gio', "#FC7A57")]);
@@ -100,8 +100,10 @@ function renderInfoBoxInfo(msg) {
 
 }
 
-function doneButtonClick() {
-  //find out which phase we're on.
+//this button should work for all of deploymentPhase, attackPhase, and fortificationPhase
+function doneClick() {
+    //find out which phase we're on.
+    //if it's fortify, make sure to move troops.
 }
 
 function deployPhaseMinusClick() {
@@ -163,32 +165,32 @@ function attackPhaseTerritoryClick() {
     } else {
         if (attackPhase.fromTerritory && !player.ownTerritory(territoryID) &&
             attackPhase.fromTerritory.adjacentTerritories.includes(territoryID)) {
-              attackPhase.toTerritory = territory;
-              toTerritoryElem.innerHTML = territory.name;
+            attackPhase.toTerritory = territory;
+            toTerritoryElem.innerHTML = territory.name;
         }
     }
 }
 
-function attackPhaseAttackClick (){
-  var fromTerritory = attackPhase.fromTerritory;
-  var toTerritory = attackPhase.toTerritory;
-  var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
-  var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
+function attackPhaseAttackClick() {
+    var fromTerritory = attackPhase.fromTerritory;
+    var toTerritory = attackPhase.toTerritory;
+    var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+    var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
 
-  myGame.attack(fromTerritory.id, toTerritory.id);
-  armyStackFrom.firstElementChild.innerHTML = fromTerritory.occupyingUnits;
-  armyStackTo.firstElementChild.innerHTML = toTerritory.occupyingUnits;
+    myGame.attack(fromTerritory.id, toTerritory.id);
+    armyStackFrom.firstElementChild.innerHTML = fromTerritory.occupyingUnits;
+    armyStackTo.firstElementChild.innerHTML = toTerritory.occupyingUnits;
 
-  if (myGame.lastAttackDetails.territoryConquered){
-    var winner = myGame.players[fromTerritory.owner - 1];
-    armyStackTo.setAttribute('style', 'background-color: ' + winner.color);
-    attackPhase.movePhaseFromTerritory = fromTerritory;
-    attackPhase.movePhaseToTerritory = toTerritory;
-    renderAttackPhaseMoveControls();
-  }
+    if (myGame.lastAttackDetails.territoryConquered) {
+        var winner = myGame.players[fromTerritory.owner - 1];
+        armyStackTo.setAttribute('style', 'background-color: ' + winner.color);
+        attackPhase.movePhaseFromTerritory = fromTerritory;
+        attackPhase.movePhaseToTerritory = toTerritory;
+        renderAttackPhaseMoveControls();
+    }
 
-  attackPhase.unitsFromBeforeOccupy = fromTerritory.occupyingUnits;
-  attackPhase.unitsToBeforeOccupy = toTerritory.occupyingUnits;
+    attackPhase.unitsFromBeforeOccupy = fromTerritory.occupyingUnits;
+    attackPhase.unitsToBeforeOccupy = toTerritory.occupyingUnits;
 
 }
 
@@ -201,73 +203,69 @@ function deployPhaseTerritoryClick() {
     infoControlTerritoryElem.innerHTML = territory.name;
 }
 
-function attackPhaseMoveDoneClick (){
+function attackPhaseMoveDoneClick() {
     myGame.fortify(attackPhase.movePhaseFromTerritory.id, attackPhase.movePhaseToTerritory.id,
-                    attackPhase.unitsToMove);
+        attackPhase.unitsToMove);
     renderAttackPhaseControls();
 }
 
-function attackPhaseMoveMinusClick (){
-  var fromTerritory = attackPhase.movePhaseFromTerritory;
-  var toTerritory = attackPhase.movePhaseToTerritory;
-  var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
-  var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
+function attackPhaseMoveMinusClick() {
+    var fromTerritory = attackPhase.movePhaseFromTerritory;
+    var toTerritory = attackPhase.movePhaseToTerritory;
+    var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+    var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
 
-  if (attackPhase.unitsToMove > 0){
-    attackPhase.unitsToMove--;
-    armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
-    armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
-  }
+    if (attackPhase.unitsToMove > 0) {
+        attackPhase.unitsToMove--;
+        armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
+        armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
+    }
 }
 
-function attackPhaseMovePlusClick (){
-  var fromTerritory = attackPhase.movePhaseFromTerritory;
-  var toTerritory = attackPhase.movePhaseToTerritory;
-  var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
-  var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
+function attackPhaseMovePlusClick() {
+    var fromTerritory = attackPhase.movePhaseFromTerritory;
+    var toTerritory = attackPhase.movePhaseToTerritory;
+    var armyStackFrom = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+    var armyStackTo = document.getElementById('territory' + toTerritory.id).firstElementChild;
 
-  if (attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove > 1){
-    attackPhase.unitsToMove++;
-    armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
-    armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
-  }
+    if (attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove > 1) {
+        attackPhase.unitsToMove++;
+        armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
+        armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
+    }
 }
 
-function renderFortifyPhaseControls (){
+function renderAttackPhaseMoveControls() {
+    var infoBoxControlsDiv = document.getElementById('info-box-controls');
+    infoBoxControlsDiv.innerHTML = "";
+    var player = myGame.currentPlayer;
 
-}
+    var moveHeadingElem = document.createElement('p');
+    var minusButton = document.createElement('button');
+    var plusButton = document.createElement('button');
+    var doneButton = document.createElement('button');
 
-function renderAttackPhaseMoveControls (){
-  var infoBoxControlsDiv = document.getElementById('info-box-controls');
-  infoBoxControlsDiv.innerHTML = "";
-  var player = myGame.currentPlayer;
+    moveHeadingElem.setAttribute('class', 'info-box-controls-heading');
+    moveHeadingElem.innerHTML = 'Move after conquer:';
+    minusButton.setAttribute('class', 'info-box-controls-math-button');
+    minusButton.id = 'minus-button';
+    minusButton.innerHTML = "-";
+    plusButton.setAttribute('class', 'info-box-controls-math-button');
+    plusButton.id = 'plus-button';
+    plusButton.innerHTML = '+';
+    doneButton.setAttribute('class', 'info-box-controls-action-button');
+    doneButton.id = 'done-button';
+    doneButton.innerHTML = 'DONE';
 
-  var moveHeadingElem = document.createElement('p');
-  var minusButton = document.createElement('button');
-  var plusButton = document.createElement('button');
-  var doneButton = document.createElement('button');
+    infoBoxControlsDiv.append(moveHeadingElem);
+    infoBoxControlsDiv.append(minusButton);
+    infoBoxControlsDiv.append(plusButton);
+    infoBoxControlsDiv.append(doneButton);
 
-  moveHeadingElem.setAttribute('class', 'info-box-controls-heading');
-  moveHeadingElem.innerHTML = 'Move after conquer:';
-  minusButton.setAttribute('class', 'info-box-controls-math-button');
-  minusButton.id = 'minus-button';
-  minusButton.innerHTML = "-";
-  plusButton.setAttribute('class', 'info-box-controls-math-button');
-  plusButton.id = 'plus-button';
-  plusButton.innerHTML = '+';
-  doneButton.setAttribute('class', 'info-box-controls-action-button');
-  doneButton.id = 'done-button';
-  doneButton.innerHTML = 'DONE';
+    minusButton.onclick = attackPhaseMoveMinusClick;
+    plusButton.onclick = attackPhaseMovePlusClick;
 
-  infoBoxControlsDiv.append(moveHeadingElem);
-  infoBoxControlsDiv.append(minusButton);
-  infoBoxControlsDiv.append(plusButton);
-  infoBoxControlsDiv.append(doneButton);
-
-  minusButton.onclick = attackPhaseMoveMinusClick;
-  plusButton.onclick = attackPhaseMovePlusClick;
-
-  doneButton.onclick = attackPhaseMoveDoneClick;
+    doneButton.onclick = attackPhaseMoveDoneClick;
 
 }
 
@@ -282,6 +280,7 @@ function doAttackPhase() {
         armyStackDiv.onclick = attackPhaseTerritoryClick;
     }
     attackButton.onclick = attackPhaseAttackClick;
+    //need to set doneButton.onclick
 }
 
 //sets the clickers
@@ -305,6 +304,174 @@ function doDeploymentPhase() {
     minusButtonElem.onclick = deployPhaseMinusClick;
     // set reset button onclick
     // set done button onclick
+}
+
+function renderFortifyPhaseControls() {
+    var infoBoxControlsDiv = document.getElementById('info-box-controls');
+    var territoryCenterDivs = document.getElementsByClassName('territory-center');
+    infoBoxControlsDiv.innerHTML = "";
+    var player = myGame.currentPlayer;
+
+    var fromHeadingElem = document.createElement('p');
+    var fromTerritoryElem = document.createElement('p');
+    var toHeadingElem = document.createElement('p');
+    var toTerritoryElem = document.createElement('p');
+    var minusButtonElem = document.createElement('button');
+    var plusButtonElem = document.createElement('button');
+    var cancelButton = document.createElement('button');
+    var doneButton = document.createElement('button');
+
+    fromHeadingElem.setAttribute('class', 'info-box-controls-heading');
+    toHeadingElem.setAttribute('class', 'info-box-controls-heading');
+    fromTerritoryElem.setAttribute('class', 'info-box-controls-territory');
+    fromTerritoryElem.id = 'from-territory';
+    toTerritoryElem.setAttribute('class', 'info-box-controls-territory');
+    toTerritoryElem.id = 'to-territory';
+    minusButtonElem.setAttribute('class', 'info-box-controls-math-button');
+    minusButtonElem.id = 'minus-button';
+    plusButtonElem.setAttribute('class', 'info-box-controls-math-button');
+    plusButtonElem.id = 'plus-button';
+    cancelButton.setAttribute('class', 'info-box-controls-action-button');
+    cancelButton.id = 'cancel-button';
+    doneButton.setAttribute('class', 'info-box-controls-action-button');
+    doneButton.id = 'done-button';
+
+    fromHeadingElem.innerHTML = 'From:';
+    toHeadingElem.innerHTML = 'To:';
+    cancelButton.innerHTML = 'CANCEL';
+    doneButton.innerHTML = 'DONE';
+    minusButtonElem.innerHTML = '-';
+    plusButtonElem.innerHTML = '+';
+
+    infoBoxControlsDiv.append(fromHeadingElem);
+    infoBoxControlsDiv.append(fromTerritoryElem);
+    infoBoxControlsDiv.append(toHeadingElem);
+    infoBoxControlsDiv.append(toTerritoryElem);
+    infoBoxControlsDiv.append(minusButtonElem);
+    infoBoxControlsDiv.append(plusButtonElem);
+    infoBoxControlsDiv.append(cancelButton);
+    infoBoxControlsDiv.append(doneButton);
+
+    this.fortificationPhase = new FortificationPhase(myGame);
+    for (var i = 0; i < territoryCenterDivs.length; ++i) {
+        var territoryCenterDiv = territoryCenterDivs[i];
+        var armyStackElem = territoryCenterDiv.firstElementChild;
+        armyStackElem.onclick = fortificationPhaseTerritoryClick;
+    }
+
+    cancelButton.onclick = fortificationPhaseCancelClick;
+    minusButtonElem.onclick = fortificationPhaseMinusClick;
+    plusButtonElem.onclick = fortificationPhasePlusClick;
+    // doneButton.onclick =
+}
+
+function fortificationPhaseCancelClick() {
+    var fromTerritory = fortificationPhase.fromTerritory;
+    var toTerritory = fortificationPhase.toTerritory;
+    var fromTerritoryElem = document.getElementById('from-territory');
+    var toTerritoryElem = document.getElementById('to-territory');
+    var fromArmyStack = null;
+    var toArmyStack = null;
+    if (fromTerritory) {
+        fromArmyStack = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+    }
+    if (toTerritory) {
+        toArmyStack = document.getElementById('territory' + toTerritory.id).firstElementChild;
+    }
+
+    fortificationPhase.set = false;
+    fortificationPhase.fromTerritory = null;
+    fortificationPhase.toTerritory = null;
+    fromTerritoryElem.innerHTML = '';
+    toTerritoryElem.innerHTML = '';
+    if (fromArmyStack) {
+        fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify;
+    }
+    if (toArmyStack) {
+        toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify;
+    }
+}
+
+function fortificationPhaseMinusClick() {
+    if (!fortificationPhase.set) return;
+    var fromTerritory = fortificationPhase.fromTerritory;
+    var toTerritory = fortificationPhase.toTerritory;
+    if (fromTerritory && toTerritory) {
+        var fromArmyStack = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+        var toArmyStack = document.getElementById('territory' + toTerritory.id).firstElementChild;
+
+        if (fortificationPhase.unitsToMove > 0) {
+            fortificationPhase.unitsToMove--;
+            fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify - fortificationPhase.unitsToMove;
+            toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify + fortificationPhase.unitsToMove;
+        }
+    }
+}
+
+function fortificationPhasePlusClick() {
+    if (!fortificationPhase.set) return;
+    var fromTerritory = fortificationPhase.fromTerritory;
+    var toTerritory = fortificationPhase.toTerritory;
+    if (fromTerritory && toTerritory) {
+        var fromArmyStack = document.getElementById('territory' + fromTerritory.id).firstElementChild;
+        var toArmyStack = document.getElementById('territory' + toTerritory.id).firstElementChild;
+
+        if (fortificationPhase.unitsFromBeforeFortify - fortificationPhase.unitsToMove > 1) {
+            fortificationPhase.unitsToMove++;
+            fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify - fortificationPhase.unitsToMove;
+            toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify + fortificationPhase.unitsToMove;
+        }
+    }
+}
+
+function fortificationPhaseTerritoryClick() {
+    var player = myGame.currentPlayer;
+    var territoryID = parseInt(this.getAttribute('territoryID'));
+    var territory = myGame.territories[territoryID - 1];
+    var fromTerritoryElem = document.getElementById('from-territory');
+    var toTerritoryElem = document.getElementById('to-territory');
+
+    /*
+    console.log('player = ' + player.id);
+    console.log('territoryID = ' + territoryID);
+    console.log(player.territories);
+    console.log('player owns territory? ' + player.ownTerritory(territoryID));
+    */
+
+    // player must press CANCEL to choose new territories.
+    if (fortificationPhase.set) return;
+
+    if (player.ownTerritory(territoryID)) {
+        // if there is no fromTerritory set, set it with this one if enought troops
+        // else if this one is fromTerritory, clear both in Phase object and interface
+        //      if this territory is adjacent to fromTerritory, set toTerritory
+        if (!fortificationPhase.fromTerritory) {
+            if (territory.occupyingUnits > 1) {
+                fortificationPhase.fromTerritory = territory;
+                fortificationPhase.unitsFromBeforeFortify = territory.occupyingUnits;
+                fromTerritoryElem.innerHTML = territory.name;
+
+            }
+        }
+
+        /*
+          if (fortificationPhase.fromTerritory.id === territory.id) {
+              fortificationPhase.fromTerritory = null;
+              fortificationPhase.toTerritory = null;
+              fromTerritoryElem.innerHTML = "";
+              toTerritoryElem.innerHTML = "";
+
+          }
+        */
+        else {
+            if (territory.adjacentTerritories.includes(fortificationPhase.fromTerritory.id)) {
+                fortificationPhase.toTerritory = territory;
+                fortificationPhase.unitsToBeforeFortify = territory.occupyingUnits;
+                fortificationPhase.set = true;
+                toTerritoryElem.innerHTML = territory.name;
+            }
+        }
+    }
 }
 
 function renderAttackPhaseControls() {
@@ -534,7 +701,8 @@ function createDivs(mapArray) {
 function initialDeployment() {
     myGame.currentPlayer = myGame.players[0];
     //renderDeployPhaseControls();
-    renderAttackPhaseControls();
+    //renderAttackPhaseControls();
+    renderFortifyPhaseControls();
 
 }
 
