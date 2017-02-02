@@ -201,6 +201,12 @@ function deployPhaseTerritoryClick() {
     infoControlTerritoryElem.innerHTML = territory.name;
 }
 
+function attackPhaseMoveDoneClick (){
+    myGame.fortify(attackPhase.movePhaseFromTerritory.id, attackPhase.movePhaseToTerritory.id,
+                    attackPhase.unitsToMove);
+    renderAttackPhaseControls();
+}
+
 function attackPhaseMoveMinusClick (){
   var fromTerritory = attackPhase.movePhaseFromTerritory;
   var toTerritory = attackPhase.movePhaseToTerritory;
@@ -225,6 +231,10 @@ function attackPhaseMovePlusClick (){
     armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
     armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
   }
+}
+
+function renderFortifyPhaseControls (){
+
 }
 
 function renderAttackPhaseMoveControls (){
@@ -256,6 +266,8 @@ function renderAttackPhaseMoveControls (){
 
   minusButton.onclick = attackPhaseMoveMinusClick;
   plusButton.onclick = attackPhaseMovePlusClick;
+
+  doneButton.onclick = attackPhaseMoveDoneClick;
 
 }
 
@@ -379,26 +391,6 @@ function renderDeployPhaseControls() {
     infoBoxControlsDiv.append(doneButton);
 
     doDeploymentPhase();
-}
-
-function renderMoveAfterConquerControls(playerID) {
-    var player = game.players[playerID - 1];
-    var headingElem = document.createElement('h3');
-    var troopsToOccupy = document.createElement('span');
-    var minusButton = document.createElement('button');
-    var plusButton = document.createElement('button');
-    var occupyButton = document.createElement('button');
-}
-
-function renderFortifyPhaseControls(playerID) {
-    var player = game.players[playerID - 1];
-    var FromElem = document.createElement('h3');
-    var fromTerritoryElem = document.createElement('h2');
-    var ToElem = document.createElement('h3');
-    var toTerritoryElem = document.createElement('h2');
-    var troopsToFortify = document.createElement('span');
-    var minusButton = document.createElement('button');
-    var plusButton = document.createElement('button');
 }
 
 function checkMapValidity(mapArray) {
