@@ -35,4 +35,13 @@ function FortificationPhase (game){
   this.unitsToBeforeFortify = 0;
   this.unitsToMove = 0;
   this.set = false;
+
+  this.clear = function (){
+    this.fromTerritory = null;
+    this.toTerritory = null;
+    this.unitsFromBeforeFortify = 0;
+    this.unitsToBeforeFortify = 0;
+    this.unitsToMove = 0;
+    this.set = false;
+  };
 }

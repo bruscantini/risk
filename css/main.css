@@ -106,11 +106,12 @@ body {
 }
 
 .info-box-controls-heading {
-  padding: 5px 0;
+  padding: 2px 0;
 }
 
 .info-box-controls-amount {
-  padding: 5px 20px;
+  padding: 3px 20px 5px;
+  font-size: 30px;
 }
 
 #from-territory {
@@ -126,25 +127,26 @@ body {
 }
 
 .info-box-controls-territory {
-
+  font-weight: bold;
 }
 
 .info-box-controls-math-button {
   width: 30px;
   height: 30px;
-  margin: 0 5px;
   border: 1px solid black;
   border-radius: 50%;
+  position: absolute;
+  bottom: 0;
   font-family: 'Droid Serif', serif;
   font-size: 20px;
 }
 
 #minus-button {
-
+  left: 125px;
 }
 
 #plus-button {
-
+  right: 125px
 }
 
 .info-box-controls-action-button {
@@ -152,6 +154,11 @@ body {
   border: 1px solid black;
   border-radius: 10%;
   font-family: 'Open Sans', sans-serif;
+}
+
+#start-button {
+  margin: 40px auto;
+  font-size: 20px;
 }
 
 #reset-button {

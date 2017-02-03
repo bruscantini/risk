@@ -3,6 +3,18 @@ var deploymentPhase;
 var attackPhase;
 var fortificationPhase;
 
+var sound = {
+    rtw: new Audio('./audio/08-rome-hq.mp3'),
+    stamp: new Audio('./audio/thick-stamp.wav'),
+    tick: new Audio('./audio/button-tick.wav'),
+    armyOfDrums: new Audio('./audio/32-army-of-drums.mp3'),
+    autumn: new Audio('./audio/03-autumn.mp3'),
+    melancholy: new Audio('./audio/04-melancholy.mp3'),
+    machineGun: new Audio('./audio/machine-gun.wav'),
+    explosion: new Audio('./audio/explosion.mp3'),
+    horn: new Audio('./audio/finale-horn.wav')
+};
+
 
 myGame.start([new Player(1, 'anthony', "#2DC2BD"), new Player(2, 'gio', "#FC7A57")]);
 
@@ -84,7 +96,7 @@ var territoryCenters = [
 ];
 
 var messages = {
-    welcome: "Hello, Are you ready to start a war?<br>Let's play RISK!",
+    welcome: "Hello, Are you ready to start a war?<br>Let's play!",
     howManyPlayers: "How many people will be playing?",
     fortifyTerritories: function(playerID) {
         return "Player " + playerID + ", Deploy your troops.";
@@ -94,20 +106,24 @@ var messages = {
 
 function renderInfoBoxInfo(heading, msg) {
     var infoBoxInfoHeading = document.getElementById('info-box-info-heading');
-    var headingPlayer = document.createElement('span');
     var infoBoxInfoP = document.getElementById('info-box-info-p');
-    headingPlayer.id = 'heading-player';
-    headingPlayer.setAttribute('style', 'color: ' + myGame.currentPlayer.color);
-    headingPlayer.innerHTML = "Player " + myGame.currentPlayer.id;
-    infoBoxInfoHeading.innerHTML = "";
-    infoBoxInfoHeading.append(headingPlayer);
+    var headingPlayer = document.createElement('span');
+
+    if (myGame.currentPlayer) {
+        headingPlayer.id = 'heading-player';
+        headingPlayer.setAttribute('style', 'color: ' + myGame.currentPlayer.color);
+        headingPlayer.innerHTML = "Player " + myGame.currentPlayer.id;
+        infoBoxInfoHeading.innerHTML = "";
+        infoBoxInfoHeading.append(headingPlayer);
+    }
+
     infoBoxInfoHeading.innerHTML += heading;
     infoBoxInfoP.innerHTML = msg;
 }
 
 function renderStatusBoxInfo(msg) {
-  var statusBoxp = document.getElementById('status-box-p');
-  statusBoxp.innerHTML = msg;
+    var statusBoxp = document.getElementById('status-box-p');
+    statusBoxp.innerHTML = msg;
 }
 
 //this button should work for all of deploymentPhase, attackPhase, and fortificationPhase
@@ -126,10 +142,16 @@ function doneClick() {
                 myGame.currentPlayer.unitsToDeploy -= unitsToAdd;
                 myGame.deploy(territoryID, unitsToAdd);
             }
+            sound.autumn.pause();
+            sound.autumn.currentTime = 0;
+            sound.armyOfDrums.play();
             renderAttackPhaseControls();
             break;
         case 1:
             myGame.changePhase();
+            sound.armyOfDrums.pause();
+            sound.armyOfDrums.currentTime = 0;
+            sound.autumn.play();
             renderFortifyPhaseControls();
             break;
         case 2:
@@ -157,7 +179,9 @@ function deployPhaseMinusClick() {
     if (currentTerritory && deploymentPhase.territories[currentTerritory.id].add > 0) {
         deploymentPhase.unitsToDeploy++;
         deploymentPhase.territories[currentTerritory.id].add--;
-
+        sound.tick.pause();
+        sound.tick.currentTime = 0;
+        sound.tick.play();
         //paint it;
         troopsToDeployAmountElem.innerHTML = deploymentPhase.unitsToDeploy;
         armyStackAmount.innerHTML =
@@ -179,6 +203,9 @@ function deployPhasePlusClick() {
     if (currentTerritory && deploymentPhase.unitsToDeploy > 0) {
         deploymentPhase.unitsToDeploy--;
         deploymentPhase.territories[currentTerritory.id].add++;
+        sound.tick.pause();
+        sound.tick.currentTime = 0;
+        sound.tick.play();
 
         //paint it;
         troopsToDeployAmountElem.innerHTML = deploymentPhase.unitsToDeploy;
@@ -196,6 +223,9 @@ function attackPhaseTerritoryClick() {
     var fromTerritoryElem = document.getElementById('from-territory');
 
     if (player.ownTerritory(territoryID) && territory.occupyingUnits > 1) {
+        sound.stamp.pause();
+        sound.stamp.currentTime = 0;
+        sound.stamp.play();
         attackPhase.toTerritory = null;
         toTerritoryElem.innerHTML = "";
         attackPhase.fromTerritory = territory;
@@ -203,6 +233,9 @@ function attackPhaseTerritoryClick() {
     } else {
         if (attackPhase.fromTerritory && !player.ownTerritory(territoryID) &&
             attackPhase.fromTerritory.adjacentTerritories.includes(territoryID)) {
+            sound.stamp.pause();
+            sound.stamp.currentTime = 0;
+            sound.stamp.play();
             attackPhase.toTerritory = territory;
             toTerritoryElem.innerHTML = territory.name;
         }
@@ -228,24 +261,35 @@ function attackPhaseAttackClick() {
     var defendingRoll = myGame.lastAttackDetails.defendingRoll;
     var attackersLost = myGame.lastAttackDetails.attackersKilled;
     var defendersLost = myGame.lastAttackDetails.defendersKilled;
+    var territoryConquered = myGame.lastAttackDetails.territoryConquered;
 
     var msg = "Player " + attacker.id + " attacks " + toTerritory.name + "!";
     msg += "<br><br>Player " + attacker.id + " rolls:<br>" + attackingRoll;
     msg += "<br><br>Player " + defender.id + " rolls:<br>" + defendingRoll;
-    if (attackersLost > 0){
-      msg += "<br><br>Player " + attacker.id + " lost " + attackersLost + " soldiers!";
+    if (attackersLost > 0) {
+        msg += "<br><br>Player " + attacker.id + " lost " + attackersLost + " soldiers!";
     }
-    if (defendersLost > 0){
-      msg += "<br><br>Player " + defender.id + " lost " + defendersLost + " soldiers!";
+    if (defendersLost > 0) {
+        msg += "<br><br>Player " + defender.id + " lost " + defendersLost + " soldiers!";
+    }
+    if (territoryConquered) {
+        msg += "<br><br>" + toTerritory.name + " has been taken!";
     }
 
+    if (attackersLost > 1 || defendersLost > 1) sound.explosion.play();
+    else sound.machineGun.play();
     renderStatusBoxInfo(msg);
 
-    if (myGame.lastAttackDetails.territoryConquered) {
-        var winner = myGame.players[fromTerritory.owner - 1];
-        armyStackTo.setAttribute('style', 'background-color: ' + winner.color);
+    if (territoryConquered) {
+        var conquerer = myGame.players[fromTerritory.owner - 1];
+        armyStackTo.setAttribute('style', 'background-color: ' + conquerer.color);
+        sound.horn.play();
 
         // check if game is over.
+        var winner = myGame.isGameOver();
+        if (winner){
+          alert('Player' + winner + " WINS!");
+        }
 
         if (fromTerritory.occupyingUnits > 1) {
             attackPhase.movePhaseFromTerritory = fromTerritory;
@@ -261,10 +305,13 @@ function attackPhaseAttackClick() {
 }
 
 function deployPhaseTerritoryClick() {
-
     var territoryID = parseInt(this.getAttribute('territoryID'));
     var territory = myGame.territories[territoryID - 1];
     var infoControlTerritoryElem = document.getElementById('to-territory');
+
+    sound.stamp.pause();
+    sound.stamp.currentTime = 0;
+    sound.stamp.play();
     deploymentPhase.currentTerritory = territory;
     infoControlTerritoryElem.innerHTML = territory.name;
 }
@@ -285,6 +332,9 @@ function attackPhaseMoveMinusClick() {
         attackPhase.unitsToMove--;
         armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
         armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
+        sound.tick.pause();
+        sound.tick.currentTime = 0;
+        sound.tick.play();
     }
 }
 
@@ -298,6 +348,9 @@ function attackPhaseMovePlusClick() {
         attackPhase.unitsToMove++;
         armyStackFrom.firstElementChild.innerHTML = attackPhase.unitsFromBeforeOccupy - attackPhase.unitsToMove;
         armyStackTo.firstElementChild.innerHTML = attackPhase.unitsToBeforeOccupy + attackPhase.unitsToMove;
+        sound.tick.pause();
+        sound.tick.currentTime = 0;
+        sound.tick.play();
     }
 }
 
@@ -449,19 +502,17 @@ function fortificationPhaseCancelClick() {
     }
     if (toTerritory) {
         toArmyStack = document.getElementById('territory' + toTerritory.id).firstElementChild;
-    }
+    }   
 
-    fortificationPhase.set = false;
-    fortificationPhase.fromTerritory = null;
-    fortificationPhase.toTerritory = null;
-    fromTerritoryElem.innerHTML = '';
-    toTerritoryElem.innerHTML = '';
     if (fromArmyStack) {
         fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify;
     }
     if (toArmyStack) {
         toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify;
     }
+    fromTerritoryElem.innerHTML = '';
+    toTerritoryElem.innerHTML = '';
+    fortificationPhase.clear();
 }
 
 function fortificationPhaseMinusClick() {
@@ -476,6 +527,9 @@ function fortificationPhaseMinusClick() {
             fortificationPhase.unitsToMove--;
             fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify - fortificationPhase.unitsToMove;
             toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify + fortificationPhase.unitsToMove;
+            sound.tick.pause();
+            sound.tick.currentTime = 0;
+            sound.tick.play();
         }
     }
 }
@@ -492,6 +546,9 @@ function fortificationPhasePlusClick() {
             fortificationPhase.unitsToMove++;
             fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify - fortificationPhase.unitsToMove;
             toArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsToBeforeFortify + fortificationPhase.unitsToMove;
+            sound.tick.pause();
+            sound.tick.currentTime = 0;
+            sound.tick.play();
         }
     }
 }
@@ -517,30 +574,26 @@ function fortificationPhaseTerritoryClick() {
         // if there is no fromTerritory set, set it with this one if enought troops
         // else if this one is fromTerritory, clear both in Phase object and interface
         //      if this territory is adjacent to fromTerritory, set toTerritory
+
+
         if (!fortificationPhase.fromTerritory) {
             if (territory.occupyingUnits > 1) {
                 fortificationPhase.fromTerritory = territory;
                 fortificationPhase.unitsFromBeforeFortify = territory.occupyingUnits;
                 fromTerritoryElem.innerHTML = territory.name;
-
+                sound.stamp.pause();
+                sound.stamp.currentTime = 0;
+                sound.stamp.play();
             }
-        }
-
-        /*
-          if (fortificationPhase.fromTerritory.id === territory.id) {
-              fortificationPhase.fromTerritory = null;
-              fortificationPhase.toTerritory = null;
-              fromTerritoryElem.innerHTML = "";
-              toTerritoryElem.innerHTML = "";
-
-          }
-        */
-        else {
+        } else {
             if (territory.adjacentTerritories.includes(fortificationPhase.fromTerritory.id)) {
                 fortificationPhase.toTerritory = territory;
                 fortificationPhase.unitsToBeforeFortify = territory.occupyingUnits;
                 fortificationPhase.set = true;
                 toTerritoryElem.innerHTML = territory.name;
+                sound.stamp.pause();
+                sound.stamp.currentTime = 0;
+                sound.stamp.play();
             }
         }
     }
@@ -558,6 +611,7 @@ function renderAttackPhaseControls() {
     var attackButton = document.createElement('button');
     var doneButton = document.createElement('button');
 
+    renderStatusBoxInfo('');
     renderInfoBoxInfo(" : ATTACK", "Choose one of your territories " +
         "to attack from and an adjacent territory to attack.");
 
@@ -601,17 +655,19 @@ function renderDeployPhaseControls() {
     var resetButton = document.createElement('button');
     var doneButton = document.createElement('button');
     var recruitsReceived = myGame.distributeReinforcements(player.id);
+    var statusBoxText = "Player " + player.id + " received " + recruitsReceived +
+          " troops.";
 
-    if (!player.alive){
-      distributeAndPaintNeutrals();
-      myGame.changePlayer();
-      renderDeployPhaseControls();
-      return;
+    if (!player.alive) {
+        distributeAndPaintNeutrals();
+        myGame.changePlayer();
+        renderDeployPhaseControls();
+        return;
     }
 
     renderInfoBoxInfo(" : DEPLOY", "Deploy your recruits to your " +
         "territories.");
-    //renderStatusBox - say how many recruitsReceived !
+    renderStatusBoxInfo(statusBoxText);
 
 
     troopsRemainingHeadingElem.setAttribute('class', 'info-box-controls-heading');
@@ -805,11 +861,17 @@ function initialDeploymentTerritoryClick() {
     var territoryID = parseInt(this.getAttribute('territoryID'));
     var territory = myGame.territories[territoryID - 1];
     var armyStackAmountElem = this.firstElementChild;
+    var statusBoxText = "Player " + player.id + " place a unit in " +
+            territory.name;
 
     if (player.ownTerritory(territoryID)) {
         player.unitsToDeploy--;
         myGame.deploy(territoryID, 1);
         armyStackAmountElem.innerHTML = territory.occupyingUnits;
+        sound.stamp.pause();
+        sound.stamp.currentTime = 0;
+        sound.stamp.play();
+        renderStatusBoxInfo(statusBoxText);
         myGame.changePlayer();
         renderInitialDeployment();
     }
@@ -833,7 +895,6 @@ function renderInitialDeployment() {
         renderDeployPhaseControls();
         return;
     } else {
-
         renderInfoBoxInfo(" : INITIAL DEPLOYMENT", "Choose one of your territories" +
             " to place a unit. We alternate players until all troops are deployed.");
 
@@ -852,10 +913,6 @@ function renderInitialDeployment() {
             armyStackDiv.onclick = initialDeploymentTerritoryClick;
         }
     }
-
-    // if currentPlayer has no more units to deploy,
-    //    changePhase and renderDeployPhaseControls;
-    // else set territory-center army stacks to initialDeploymentTerritoryClick
 }
 
 function initialDeployment() {
@@ -868,45 +925,41 @@ function initialDeployment() {
     myGame.currentPlayer = myGame.players[2];
     distributeAndPaintNeutrals();
     myGame.currentPlayer = myGame.players[0];
-    //
-
 
     renderInitialDeployment();
-    //renderDeployPhaseControls();
-    //renderAttackPhaseControls();
-    //renderFortifyPhaseControls();
 
 }
 
-//checkMapValidity(map);
-//createDivs(map);
-//console.log(getBodyHTML());
-removeBackgroundColorOfDivs();
-//setTerritoryClickTriggers();
-setTerritoryCenters(territoryCenters);
-createStacks();
-initialDeployment();
+function startButtonClick (){
+  sound.rtw.pause();
+  sound.currentTime = 0;
+  sound.autumn.play();
+  removeBackgroundColorOfDivs();
+  renderStatusBoxInfo('');
+  createStacks();
+  initialDeployment();
+}
 
-/*
- *  Inteface plan:
- *    1. Ask user to choose how many people will play. (5 buttons)
- *    2. Based on this result, prompt user for player1 name, player2 name, etc.
- *    3. Create the player objects array, pass it to Game.start().
- *    4. Show board with one unit of owner on each territory.
- *    5. While there are still units to deploy, cycle through each player prompting
- *       them to choose one of their territories to deploy a unit in.
- *            - if player is a computer (player.alive === false), randomly place
- *            in one of their territories.
- *    6. Now cylce through player turns:
- *        Deployment phase:
- *          a. players recruit reinforcements based on territories
- *             owned (distributeReinforcements(playerID)).
- *          b. player allocates units to his territories. He/she can do place
- *             more than one unit on a territory at a time, if they wish.
- *          c. click DONE button to move to next phase.
- *        Attacking phase:
- *          a. player chooses from/to territories and clicks ATTACK button to
- *             attack. Results are shown.
- *          b. click DONE button to move to next phase.
- *        Fortification phase:
- */
+function startGame() {
+    var infoBoxControlsDiv = document.getElementById('info-box-controls');
+    var startButton = document.createElement('button');
+    var statusBoxText = "In this game, you will compete with your friend to" +
+      " take over the world. Each player is assigned territories at" +
+      " random. Deploy your troops efficiently to have success on the battlefield.";
+    startButton.setAttribute('class', 'info-box-controls-action-button');
+    startButton.id = 'start-button';
+    startButton.innerHTML = 'START';
+    startButton.onclick = startButtonClick;
+
+    infoBoxControlsDiv.append(startButton);
+    renderInfoBoxInfo('RISK', messages.welcome);
+    renderStatusBoxInfo(statusBoxText);
+    sound.rtw.play();
+
+}
+
+//removeBackgroundColorOfDivs();
+setTerritoryCenters(territoryCenters);
+//createStacks();
+//initialDeployment();
+startGame();
