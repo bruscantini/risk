@@ -9,7 +9,7 @@ body {
   height: 627px;
   margin: 0px;
   position: relative;
-  background-image: url("../img/risk_game_mapWN.png");
+  background-image: url("./../img/risk_game_mapWN.png");
 }
 
 #board-pixel-container {
@@ -24,7 +24,7 @@ body {
   animation: slideIn 5s;
   width: 400px;
   height: 106px;
-  background-image: url('../img/risk_logo.png');
+  background-image: url('./../img/risk_logo.png');
   background-size: cover;
   z-index: 999;
   position: absolute;
