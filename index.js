@@ -12,7 +12,8 @@ var sound = {
     melancholy: new Audio('./audio/04-melancholy.mp3'),
     machineGun: new Audio('./audio/machine-gun.wav'),
     explosion: new Audio('./audio/explosion.mp3'),
-    horn: new Audio('./audio/finale-horn.wav')
+    horn: new Audio('./audio/finale-horn.wav'),
+    end: new Audio('./audio/end-sound.mp3')
 };
 
 
@@ -164,6 +165,8 @@ function doneClick() {
             myGame.changePlayer();
             renderDeployPhaseControls();
     }
+    sound.end.play();
+
 }
 
 function deployPhaseMinusClick() {
@@ -502,7 +505,7 @@ function fortificationPhaseCancelClick() {
     }
     if (toTerritory) {
         toArmyStack = document.getElementById('territory' + toTerritory.id).firstElementChild;
-    }   
+    }
 
     if (fromArmyStack) {
         fromArmyStack.firstElementChild.innerHTML = fortificationPhase.unitsFromBeforeFortify;
@@ -688,7 +691,6 @@ function renderDeployPhaseControls() {
     troopsRemainingHeadingElem.innerHTML = "Troops to Deploy:";
     troopRemainingAmountElem.innerHTML = player.unitsToDeploy;
     minusButton.innerHTML = '-';
-    //troopsToDeployElem.innerHTML = "0";
     plusButton.innerHTML = '+';
     resetButton.innerHTML = 'RESET';
     doneButton.innerHTML = 'DONE';
@@ -698,7 +700,7 @@ function renderDeployPhaseControls() {
     infoBoxControlsDiv.append(minusButton);
     infoBoxControlsDiv.append(territoryElem);
     infoBoxControlsDiv.append(plusButton);
-    infoBoxControlsDiv.append(resetButton);
+    //infoBoxControlsDiv.append(resetButton);
     infoBoxControlsDiv.append(doneButton);
 
     doDeploymentPhase();
@@ -919,6 +921,7 @@ function initialDeployment() {
     myGame.currentPlayer = myGame.players[0];
 
     // for testing, deploy units and skip inital deployment.
+
     distributeAndPaintNeutrals();
     myGame.currentPlayer = myGame.players[1];
     distributeAndPaintNeutrals();
@@ -926,11 +929,14 @@ function initialDeployment() {
     distributeAndPaintNeutrals();
     myGame.currentPlayer = myGame.players[0];
 
+
     renderInitialDeployment();
 
 }
 
 function startButtonClick (){
+  var titleBox = document.getElementById('title-box');
+  titleBox.setAttribute('style', 'visibility: hidden');
   sound.rtw.pause();
   sound.currentTime = 0;
   sound.autumn.play();
@@ -941,11 +947,19 @@ function startButtonClick (){
 }
 
 function startGame() {
+    var boardDiv = document.getElementById('board');
     var infoBoxControlsDiv = document.getElementById('info-box-controls');
+    var titleBox = document.createElement('div');
+    titleBox.id = 'title-box';
+    boardDiv.append(titleBox);
+
+
     var startButton = document.createElement('button');
-    var statusBoxText = "In this game, you will compete with your friend to" +
-      " take over the world. Each player is assigned territories at" +
-      " random. Deploy your troops efficiently to have success on the battlefield.";
+    var statusBoxText = "Player 1 (blue) will compete with Player" +
+      " 2 (red) to take over the world. Each player is assigned territories at" +
+      " random. Neutral player (grey) will mind his own business," +
+      " but will defend himself if attacked. Deploy your troops efficiently to have" +
+      " success on the battlefield.";
     startButton.setAttribute('class', 'info-box-controls-action-button');
     startButton.id = 'start-button';
     startButton.innerHTML = 'START';
@@ -955,6 +969,7 @@ function startGame() {
     renderInfoBoxInfo('RISK', messages.welcome);
     renderStatusBoxInfo(statusBoxText);
     sound.rtw.play();
+
 
 }
 

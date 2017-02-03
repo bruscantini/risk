@@ -20,6 +20,29 @@ body {
   left: -5px;
 }
 
+#title-box {
+  animation: slideIn 5s;
+  width: 400px;
+  height: 106px;
+  background-image: url('../risk_logo.png');
+  background-size: cover;
+  z-index: 999;
+  position: absolute;
+  top: 180px;
+  left: 33%;
+}
+
+
+@keyframes slideIn {
+  0% {
+    top: -250px;
+  }
+
+  100% {
+    top: 180px;
+  }
+}
+
 .row {
   width: 1227px;
   height: 25px;
@@ -58,6 +81,10 @@ body {
   font-family: 'Droid Serif', serif;
   font-size: 25px;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
+}
+
+.army-stack > p:hover {
+  cursor: pointer;
 }
 
 #info-box {
@@ -141,6 +168,14 @@ body {
   font-size: 20px;
 }
 
+.info-box-controls-math-button:hover {
+  cursor: pointer;
+}
+
+.info-box-controls-math-button:focus {
+  outline: 0;
+}
+
 #minus-button {
   left: 125px;
 }
@@ -154,6 +189,10 @@ body {
   border: 1px solid black;
   border-radius: 10%;
   font-family: 'Open Sans', sans-serif;
+}
+
+.info-box-controls-action-button:hover {
+  cursor: pointer;
 }
 
 #start-button {
@@ -198,7 +237,7 @@ body {
 }
 
 #status-box-p {
-  padding-top: 5px;
+  padding-top: 15px;
 }
 
 .continent1 {
