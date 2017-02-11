@@ -1,25 +1,25 @@
 html {
-  font-size: 10px;
+  width: 100vw;
+  height: 100vh;
+  font-size: 1vmin;
 }
 
 body {
   padding: 0;
   margin: 0;
+  width: 100vw;
+  height: 100vh;
   font-family: 'Inconsolata', monospace;
 }
 
-#board {
-  width: 100vw; /* 1227px */
-  height: auto; /* 627px */
-  margin: 0;
-  position: relative;
-  background-image: url("./../img/risk_game_mapWN.png");
-}
-
-#board-pixel-container {
-  position: absolute;
-  width: 100%;
-  height: auto;
+p {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+     -khtml-user-select: none; /* Konqueror HTML */
+       -moz-user-select: none; /* Firefox */
+        -ms-user-select: none; /* Internet Explorer/Edge */
+            user-select: none; /* Non-prefixed version, currently
+                                  supported by Chrome and Opera */
 }
 
 #title-box {
@@ -45,6 +45,23 @@ body {
   }
 }
 
+#board {
+  width: 100%;
+  height: 100vh;
+  margin: 0;
+  position: relative;
+  background-image: url("./../img/risk_game_mapWN.png");
+  background-size: 100% 100%;
+}
+
+#board-pixel-container {
+  position: absolute;
+  width: 100%;
+  height: 100vh;
+  bottom: 0vh;
+  left: 0vw;
+}
+
 .row {
   width: 100%;
   height: 4vh;
@@ -54,8 +71,8 @@ body {
 }
 
 .mapPixel {
-  width: 2.04vw;
-  height: 2.04vw;
+  width: 2.0408%;
+  height: 4vh;
   float: left;
   box-sizing: border-box;
 }
@@ -65,23 +82,22 @@ body {
 }
 
 .army-stack {
-
-  width: 4vw;
-  height: 4vw;
-  border: 3px solid black;
+  width: 6rem;
+  height: 6rem;
+  border: 2px solid black;
   border-radius: 50%;
   box-sizing: border-box;
   position: absolute;
-  top: -7px;
-  left: -7px;
+  top: -4rem;
+  left: -2rem;
   text-align: center;
-  padding-top: 6px;
+  padding-top: 0.9rem;
 }
 
 .army-stack > p {
   color: white;
   font-family: 'Droid Serif', serif;
-  font-size: 2.5rem;
+  font-size: 4rem;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
@@ -90,65 +106,70 @@ body {
 }
 
 #info-box {
-  width: 65vw;
-  height: 10vh;
+  width: 60vw;
+  height: 16vh;
   border: 3px solid black;
   border-radius: 8%;
   position: absolute;
-  bottom: -10px;
-  right: 140px;
+  bottom: 0.2vh;
+  right: 10.3vw;
   background-color: #FDFFF7;
   font-family: 'Inconsolata', monospace;
   text-align: center;
 }
 
 #info-box-info {
-  width: 37vw;
-  height: 11vh;
+  width: 30vw;
+  height: 16vh;
   box-sizing: border-box;
+  padding: 0.5vmin;
   float: left;
   border-right: 2px solid black;
+  overflow-y: scroll;
 }
 
 #info-box-info-heading {
-  padding-top: 5px;
-  font-size: 2rem;
+  padding-bottom: 1vh;
+  font-size: 4rem;
   font-weight: bold;
 }
 
 #heading-player {
-  font-size: 2.5rem;
+  font-size: 4rem;
   text-shadow: -1px 0 black, 0 1px black, 1px 0 black, 0 -1px black;
 }
 
 #info-box-info-p {
-  padding-top: 5px;
+  padding: 0.2vh 0.15vw;
+  font-size: 2.4rem;
 }
 
 #info-box-controls {
-  width: 350px;
-  height: 110px;
+  width: 30vw;
+  height: 16vh;
   box-sizing: border-box;
+  padding: 0.5vmin;
   float: left;
   position: relative;
   text-align: center;
 }
 
 .info-box-controls-heading {
-  padding: 2px 0;
+  padding-bottom: 0.1vh;
+  font-size: 2.5rem;
 }
 
 .info-box-controls-amount {
-  padding: 3px 20px 5px;
-  font-size: 3rem;
+  padding: 0.3vh 0.4vw 0.1vh;
+  font-size: 4.7rem;
 }
 
 #from-territory {
-
+  font-size: 3rem;
 }
 
 #to-territory {
-
+  font-size: 3rem;
 }
 
 #troops-to-deploy {
@@ -160,14 +181,15 @@ body {
 }
 
 .info-box-controls-math-button {
-  width: 30px;
-  height: 30px;
+  width: 4vmin;
+  height: 4vmin;
   border: 1px solid black;
   border-radius: 50%;
+  padding: 0.2vmin 1vmin 1vmin 1vmin;
   position: absolute;
   bottom: 0;
   font-family: 'Droid Serif', serif;
-  font-size: 2rem;
+  font-size: 3rem;
 }
 
 .info-box-controls-math-button:hover {
@@ -179,11 +201,11 @@ body {
 }
 
 #minus-button {
-  left: 125px;
+  left: 12vw;
 }
 
 #plus-button {
-  right: 125px
+  right: 12vw;
 }
 
 .info-box-controls-action-button {
@@ -191,6 +213,7 @@ body {
   border: 1px solid black;
   border-radius: 10%;
   font-family: 'Open Sans', sans-serif;
+  font-size: 2rem;
 }
 
 .info-box-controls-action-button:hover {
@@ -198,7 +221,7 @@ body {
 }
 
 #start-button {
-  margin: 40px auto;
+  margin: 4vh auto 0;
   font-size: 2rem;
 }
 
@@ -227,19 +250,21 @@ body {
 }
 
 .status-box {
-  width: 180px;
-  height: 300px;
+  width: 15vw;
+  height: 50vh;
   border: 3px solid black;
   border-radius: 8%;
   position: absolute;
-  bottom: -10px;
-  left: 5px;
+  bottom: 0.2vh;
+  left: 0.5vw;
   background-color: #FDFFF7;
   text-align: center;
+  overflow-y: auto;
 }
 
 #status-box-p {
-  padding-top: 15px;
+  padding: 1.1vh 0.5vw;
+  font-size: 2.575rem;
 }
 
 .continent1 {
@@ -263,6 +288,5 @@ body {
 }
 
 .continent6 {
-
   background-color: purple;
 }
